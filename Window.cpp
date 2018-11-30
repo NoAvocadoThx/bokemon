@@ -46,8 +46,7 @@ Curve *c5;
 Curve *c6;
 Curve *c7;
 
-glm::vec3 p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13,
-p14, p15, p16, p17, p18, p19, p20,p21,p22, p23;
+
 
 Transform * modelMtx;
 Transform * singleArmy;
@@ -62,16 +61,7 @@ glm::vec3 lastPoint,currPoint;
 GLfloat rotationSpeed=1.5f;
 GLint normalColor = 1;
 GLfloat scroll=0;
-GLint grid_size=10;
-GLfloat gridSpace =6.0f;
-GLint indexSelect=0;
-GLint counter=0;
-GLfloat lineSeg;
-GLint countCurve;
-GLint riderCount;
-GLint counterR = 0;
-GLint counterCurveN;
-GLint lineSegN;
+
 glm::mat4 mat =glm::mat4(1.0f);
 glm::vec3 top;
 
@@ -146,104 +136,20 @@ void Window::initialize_objects()
 	//culling sphere
 	//sphere = new Geometry("../eyeball_s.obj");
 	//sphere->isSphere = true;
-	sphere = new OBJObject("../sphere.obj");
-	sphere->scaleSize(0.3f);
+	
 	cube = new Cube();
 
-	RC = new OBJObject("../sphere.obj");
-	//RC->scaleSize(20.0f);
-	RC->objRotation = false;
-	RC->camRot = false;
-	//RC->translate(glm::vec3(2.0f, 1.0f, 1.0f));
-	currObj = RC;
-	randn = RC->randomFloat(0.0f, 35.0f);
+
+	
 	
 	//define points
 	//c0
-	p0 = glm::vec3(10.0f, 14.0f, -15.0f);
-	p1 = glm::vec3(5.0f, 8.0f, -15.0f);
-	p2 = glm::vec3(10.0f, 10.0f, -15.0f);
-	p3 = glm::vec3(18.0f, 5.0f, -10.0f);
-	//c1
-	p4 = glm::vec3(p3 - p2 + p3);
-	p5 = glm::vec3(0.0f, 5.0f, 5.0f);
-	p6 = glm::vec3(10.0f, 8.0f, -15.0f);
-    //c2
-	p7 = glm::vec3(p6 - p5 + p6);
-	p8 = glm::vec3(15.0f, 0.0f, -10.0f);
-	p9 = glm::vec3(6.0f, 8.0f, -18.0f);
-	//c3
-	p10 = glm::vec3(p9 - p8 + p9);
-	p11 = glm::vec3(8.0f, 5.0f, 8.0f);
-	p12 = glm::vec3(-5.0f, -5.0f, 10.0f);
-	//c4
-	p13 = glm::vec3(p12 - p11 + p12);
-	p14 = glm::vec3(-10.0f, 4.0f, 14.0f);
-	p15 = glm::vec3(-10.0f, -5.0f, -14.0f);
-	//c5
-	p16 = glm::vec3(p15 - p14 + p15);
-	p17 = glm::vec3(0.0f, 0.0f, -10.0f);
-	p18 = glm::vec3(18.0f, 10.0f, -10.0f);
-	//c6
-	p19 = glm::vec3(p18 - p17 + p18);
-	p20 = glm::vec3(16.0f, 15.0f, -20.0f);
-	p21 = glm::vec3(13.0f, 10.0f, -13.0f);
-	//c7
-	p22 = glm::vec3(p21 - p20 + p21);
-	p23 = glm::vec3(p0 - p1 + p0);
-	currPt = p0;
-	//define curves
-	c0 = new Curve(p0, p1, p2, p3);
-	c1 = new Curve(p3, p4, p5, p6);
-	c2 = new Curve(p6, p7, p8, p9);
-	c3 = new Curve(p9, p10, p11, p12);
-	c4 = new Curve(p12, p13, p14, p15);
-	c5 = new Curve(p15, p16, p17, p18);
-	c6 = new Curve(p18, p19, p20, p21);
-	c7 = new Curve(p21, p22, p23, p0);
-	//push curves
-	curves.push_back(c0);
-	curves.push_back(c1);
-	curves.push_back(c2);
-	curves.push_back(c3);
-	curves.push_back(c4);
-	curves.push_back(c5);
-	curves.push_back(c6);
-	curves.push_back(c7);
 	
-	for (Curve *c : curves) {
-		//push anchors
-		anchor.push_back(c->p0);
-		//push selectable points
-		selectPts.push_back(c->p0);
-		selectPts.push_back(c->p1);
-		selectPts.push_back(c->p2);
-	}
+
 	
 	//push control points
 	
-	ctrPts.push_back(p2);
-	ctrPts.push_back(p4);
-	ctrPts.push_back(p5);
-	ctrPts.push_back(p7);
-	ctrPts.push_back(p8);
-	ctrPts.push_back(p10);
-	ctrPts.push_back(p11);
-	ctrPts.push_back(p13);
-	ctrPts.push_back(p14);
-	ctrPts.push_back(p16);
-	ctrPts.push_back(p17);
-	ctrPts.push_back(p19);
-	ctrPts.push_back(p20);
-	ctrPts.push_back(p22);
-	ctrPts.push_back(p1);
-	ctrPts.push_back(p23);
-	
-	
-	
 
-	RC->scaleSize(0.9f);
-	RC->translate(p0);
 	
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -336,113 +242,7 @@ void Window::idle_callback()
 	// Call the update function the cube
 	//currObj->update();
 	//modelMtx->update();
-	GLfloat temp=-88;
-	for (Curve * c : curves) {
-		for (glm::vec3 p: c->curvePts) {
-			if (p.y > temp) {
-				temp = p.y;
-				top = p;
-			}
-		}
-	}
-	if (!pause) {
-		move();
-	}
-	if (reachTop) {
-		lineSeg = 0;
-		counter = 0;
-		countCurve = 0;
-		reachTop = false;
-	}
 	
-}
-void Window::move() {
-   GLfloat speed=2.0f;
-   GLfloat tempV=0.0f;
-   GLfloat acceleration=0.000005f;
-   GLfloat curHeight=mat[3][1];
-   
-   Curve * curCurve = curves.at(countCurve);
-  // glm::vec3 nextPoint = curCurve->curvePts.at(lineSeg);
-   if (rider) {
-	
-	   Curve * curRCurve = curves.at(counterR);
-
-	   glm::vec3 nextPoint = curRCurve->curvePts.at(riderCount);
-	   mat[3] = glm::vec4(nextPoint, 1.0f);
-	  
-	   cam_pos = nextPoint;
-	   //cam_pos = pow(1 - riderCount / 150.0f, 3)*curRCurve->p0 + 3 * pow(1 - riderCount / 150.0f, 2)*riderCount / 150.0f*curRCurve->p1 +
-		 //  3 * (1 - riderCount / 150.0f)*riderCount / 150.0f*riderCount / 150.0f*curRCurve->p2 + riderCount / 150.0f * riderCount / 150.0f*riderCount / 150.0f*curRCurve->p3;
-	   cam_look_at = glm::vec3((-3 * (1 - riderCount / 150.0f)*(1 - riderCount / 150.0f))*glm::vec3(curRCurve->p0.x, curRCurve->p0.y, curRCurve->p0.z)
-		   + (GLfloat)(9 * riderCount / 150.0f*riderCount / 150.0f - 12 * riderCount / 150.0 + 3)*glm::vec3(curRCurve->p1.x, curRCurve->p1.y, curRCurve->p1.z)
-		   + (GLfloat)(-9 * riderCount / 150.0f*riderCount / 150.0f + 6 * riderCount / 150.0f)*glm::vec3(curRCurve->p2.x, curRCurve->p2.y, curRCurve->p2.z) + 3 * riderCount / 150.0f*riderCount / 150.0f*glm::vec3(curRCurve->p3.x, curRCurve->p3.y, curRCurve->p3.z));
-
-	   V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-	   riderCount = riderCount+1;
-	   if (riderCount == 150) {
-		   riderCount = 0;
-		   counterR++;
-	   }
-	   if (counterR == 8) {
-		   counterR = 0;
-	   }
-	  
-	   
-		 
-		   
-		 
-	  
-   }
-   else {
-	   cam_pos=glm::vec3(0.0f, 0.0f, 20.0f);
-	   cam_look_at=glm::vec3(0.0f, 0.0f, 0.0f);
-	   V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-   }
-  
-  if (reachTop) {
-	   lineSeg = 0;
-	   counter = 0;
-	   countCurve = 0;
-	   reachTop = false;
-   }
-   GLfloat topY = top.y;
-   GLfloat heightChange = curHeight - topY;
-   speed = (GLfloat)sqrt(-9.0f*heightChange*acceleration)+0.001f;
-   if (lineSeg + speed <= 1.0f) {
-	   lineSeg = counter / 150.0f + speed;
-	   glm::vec4 T = glm::vec4(pow(lineSeg, 3.0f), pow(lineSeg, 2.0f), lineSeg, 1.0f);
-	   mat[3] = curCurve->G*curCurve->B*T;
-	   counter++;
-	   if (!normal) {
-		   cout << "v: " << speed << endl;
-	   }
-   }
-   else {
-	   lineSeg -= 1;
-	   counter = 0;
-	   countCurve++;
-   }
-   if (countCurve == 8) {
-	   countCurve = 0;
-	 
-   }
-    
-	if(normal){
-	 Curve * curRCurve = curves.at(counterCurveN);
-
-	   glm::vec3 nextPoint = curRCurve->curvePts.at(lineSegN);
-	   mat[3] = glm::vec4(nextPoint, 1.0f);mat[3] = glm::vec4(nextPoint, 1.0f);
-   lineSegN=lineSegN+2.0f;
-   if (lineSegN == 150) {
-       lineSegN = 0;
-        counterCurveN++;
-   }
-   if (counterCurveN == 8) {
-	   counterCurveN = 0;
-   }
-   //cout << "v: " << speed << endl;
-   }
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -454,43 +254,10 @@ void Window::display_callback(GLFWwindow* window)
 	// Use the shader of programID
 	glUseProgram(skyboxShader);
 	cube->draw(skyboxShader);
-	glUseProgram(curveShader);
 	
 	
-	for (Curve* c : curves) {
-		c->draw(curveShader);
-	}
-	glUseProgram(reflectShader);
-	RC->draw(reflectShader,mat);
-	//draw anchors
-	glUseProgram(sphereShader);
-	
-	glm::mat4 transMat = glm::mat4(1.0f);
-	transMat = glm::scale(glm::mat4(1.0f), glm::vec3(0.15f));
-	//draw anchors
-	for (int i = 0; i < anchor.size(); i++) {
-		transMat[3] = glm::vec4(anchor[i], 1.0f);
-		glUniform3f(glGetUniformLocation(sphereShader, "pickColor"), 0.9f, 0.1f, 0.1f);
-		if (i * 3 == indexSelect) {
-			glUniform3f(glGetUniformLocation(sphereShader, "pickColor"), 0.3f, 0.1f, 0.8f);
-		}
-		sphere->draw(sphereShader, transMat);
-		
-	}
-	//draw control points
-	
-	for (int i = 0; i < ctrPts.size(); i++) {
-		transMat[3] = glm::vec4(ctrPts[i], 1.0f);
-		glUniform3f(glGetUniformLocation(sphereShader, "pickColor"), selectColor.x, selectColor.y, selectColor.z);
-		if ((i == 0&&indexSelect==2) ) {
-			glUniform3f(glGetUniformLocation(sphereShader, "pickColor"), 0.3f, 0.1f, 0.8f);
-		}
-		sphere->draw(sphereShader, transMat);
-	}
 
-	drawLine(curveShader);
 
-	calculate();
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -502,121 +269,7 @@ void Window::display_callback(GLFWwindow* window)
 	//dirSphere->scaleSize(4.0f);
 	robotNum = 0;
 }
-void Window::calculate() {
-	if (selection) {
-		int i = 0;
-		p0 = selectPts[i];
-		i++;//1
-		p1 = selectPts[i];
-		i++;//2
-		p2 = selectPts[i];
-		i++;//3
-		p3 = selectPts[i];
-		i++;//4
-		p4 = selectPts[i];
-		i++;//5
-		p5 = selectPts[i];
-		i++;//6
-		p6 = selectPts[i];
-		i++;//7
-		p7 = selectPts[i];
-		i++;//8
-		p8 = selectPts[i];
-		i++;//9
-		p9 = selectPts[i];
-		i++;//10
-		p10 = selectPts[i];
-		i++;//11
-		p11 = selectPts[i];
-		i++;//12
-		p12 = selectPts[i];
-		i++;//13
-		p13 = selectPts[i];
-		i++;//14
-		p14 = selectPts[i];
-		i++;//15
-		p15 = selectPts[i];
-		i++;//16
-		p16 = selectPts[i];
-		i++;//17
-		p17 = selectPts[i];
-		i++;//18
-		p18 = selectPts[i];
-		i++;//19
-		p19 = selectPts[i];
-		i++;//20
-		p20 = selectPts[i];
-		i++;//21
-		p21 = selectPts[i];
-		i++;//22
-		p22 = selectPts[i];
-		i++;//23
-		p23 = selectPts[i];
-	}
-	//if (indexSelect == 2 || indexSelect == 5 || indexSelect == 8 || indexSelect == 11 || indexSelect == 14 ||
-	//	indexSelect == 17 || indexSelect == 20 || indexSelect == 23) {
-		p1 = (p0 + p0 - p23);
-		p4 = (p3 + p3 - p2);
-		p7 = (p6 + p6 - p5);
-		p10 = (p9 + p9 - p8);
-		p13 = (p12 + p12 - p11);
-		p16 = (p15 + p15 - p14);
-		p19 = (p18 + p18 - p17);
-		p22 = (p21 + p21 - p20);
-	//}
-    if (indexSelect == 1 || indexSelect == 4 || indexSelect == 7 || indexSelect == 10 || indexSelect == 13 ||
-		indexSelect == 16 || indexSelect == 29 || indexSelect == 22){
 
-		/*p23 = p0 + p0 - p1;
-		p2 = p3 + p3 - p4;
-		p5 = p6 + p6 - p7;
-		p8 = p0 + p9 - p10;
-		p11 = p12 + p12 - p13;
-		p14 = p15 + p15 - p16;
-		p17 = p18 + p18 - p19;
-		p20 = p21 + p21 - p22;*/
-		
-	}
-	ctrPts.clear();
-	ctrPts.push_back(p2);
-	ctrPts.push_back(p4);
-	ctrPts.push_back(p5);
-	ctrPts.push_back(p7);
-	ctrPts.push_back(p8);
-	ctrPts.push_back(p10);
-	ctrPts.push_back(p11);
-	ctrPts.push_back(p13);
-	ctrPts.push_back(p14);
-	ctrPts.push_back(p16);
-	ctrPts.push_back(p17);
-	ctrPts.push_back(p19);
-	ctrPts.push_back(p20);
-	ctrPts.push_back(p22);
-	ctrPts.push_back(p1);
-	ctrPts.push_back(p23);
-	c0 = new Curve(p0, p1, p2, p3);
-	c1 = new Curve(p3, p4, p5, p6);
-	c2 = new Curve(p6, p7, p8, p9);
-	c3 = new Curve(p9, p10, p11, p12);
-	c4 = new Curve(p12, p13, p14, p15);
-	c5 = new Curve(p15, p16, p17, p18);
-	c6 = new Curve(p18, p19, p20, p21);
-	c7 = new Curve(p21, p22, p23, p0);
-	curves.clear();
-	curves.push_back(c0);
-	curves.push_back(c1);
-	curves.push_back(c2);
-	curves.push_back(c3);
-	curves.push_back(c4);
-	curves.push_back(c5);
-	curves.push_back(c6);
-	curves.push_back(c7);
-	anchor.clear();
-	for (Curve *c : curves) {
-		//push anchors
-		anchor.push_back(c->p0);
-	}
-}
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	
@@ -767,30 +420,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 
 		}
 
-		if (key == GLFW_KEY_X) {
-			if (mods == GLFW_MOD_SHIFT) {
-				selectPts[indexSelect].x -= 0.3f;
-			}
-			else {
-				selectPts[indexSelect].x += 0.3f;
-			}
-		}
-		if (key == GLFW_KEY_Y) {
-			if (mods == GLFW_MOD_SHIFT) {
-				selectPts[indexSelect].y -= 0.3f;
-			}
-			else {
-				selectPts[indexSelect].y += 0.3f;
-			}
-		}
-		if (key == GLFW_KEY_Z) {
-			if (mods == GLFW_MOD_SHIFT) {
-				selectPts[indexSelect].z -= 0.3f;
-			}
-			else {
-				selectPts[indexSelect].z += 0.3f;
-			}
-		}
+
 		if (key == GLFW_KEY_P) {
 
 			if (nToggle) {
@@ -868,12 +498,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 			left_release = false;
 			glfwGetCursorPos(window, &c_initX, &c_initY);
 			lastPoint = trackBallMapping(glm::vec2(c_initX, c_initY));
-			if (indexSelect == selectPts.size() - 1) {
-				indexSelect = 0;
-			}
-			else {
-				indexSelect += 1;
-			}
+			
 		
 			//cout << "selection xyz:" << selectPts[indexSelect].x << endl;
 
@@ -886,13 +511,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 	}
 	else if (button == GLFW_MOUSE_BUTTON_2) {
 		if (action == GLFW_PRESS) {
-			if (indexSelect == 0) {
-				indexSelect = selectPts.size() - 1;
-			}
-			else {
-				indexSelect -= 1;
-			}
-			glUniform3f(glGetUniformLocation(sphereShader, "pickColor"), 0.5f, 0.1f, 0.1f);
+			
 			//cout << "selection xyz:" << selectPts[indexSelect].x << endl;
 			
 		}
