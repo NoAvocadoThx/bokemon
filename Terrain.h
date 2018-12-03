@@ -19,24 +19,29 @@
 
 
 
-using namespace std;
 class Terrain{
 private:
 	const GLfloat size = 800.0f;
 	const GLint vertexCount = 128;
-	GLfloat x;
-	GLfloat z;
-	vector<glm::vec3> tris;
-	vector<glm::vec3> vertices;
-	vector<glm::vec3> normals;
+	
+	
 public:
-	GLuint VBO, VAO, EBO;
+
+	
+	std::vector<glm::vec3> tris;
+	
+	GLuint VBO, VAO, EBO,Norms;
+	GLuint uProjection, uModelview;
+	glm::vec3 position;
+	
+	glm::mat4 toWorld;
+	GLint terrainCount = 0;
 	const GLfloat width = 10.0f;
 	const GLfloat length = 10.0f;
 	Terrain::Terrain(int,int);
 	Terrain::Terrain();
 	Terrain::~Terrain();
-	void generateTerrain(int, int);
+	void generateTerrain();
 	void draw(GLuint);
 
 

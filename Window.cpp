@@ -2,6 +2,7 @@
 #include "OBJObject.h"
 #include "Geometry.h"
 #include "Transform.h"
+#include "Terrain.h"
 #include <algorithm>
 #include <iostream>
 #include "Curve.h"
@@ -18,6 +19,7 @@ GLint skyboxShader;
 GLint reflectShader;
 GLint curveShader;
 GLint sphereShader;
+GLint terrainShader;
 GLfloat fov = 45.0f;
 GLint robotNum;
 GLfloat distance;
@@ -72,6 +74,8 @@ vector<glm::vec3> selectPts;
 glm::vec3 currPt;
 glm::vec3 selectColor= glm::vec3(0.1f, 0.9f, 0.1f);
 
+Terrain *terrain;
+
 bool left_release=true;
 //toggle parameter
 bool nToggle = false;
@@ -108,6 +112,8 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define CURVE_FRAG "../curveShader.frag"
 #define SPHERE_VERT "../sphereShader.vert"
 #define SPHERE_FRAG "../sphereShader.frag"
+#define TERRAIN_VERT "../selectShader.vert"
+#define TERRAIN_FRAG "../selectShader.frag"
 
 
 // Default camera parameters
@@ -139,7 +145,7 @@ void Window::initialize_objects()
 	
 	cube = new Cube();
 
-
+	terrain = new Terrain();
 	
 	
 	//define points
@@ -156,7 +162,8 @@ void Window::initialize_objects()
 	skyboxShader = LoadShaders(SKYBOX_VERT, SKYBOX_FRAG);
 	reflectShader = LoadShaders(REFLECT_VERT, REFLECT_FRAG);
 	curveShader = LoadShaders(CURVE_VERT, CURVE_FRAG);
-   sphereShader = LoadShaders(SPHERE_VERT,SPHERE_FRAG);
+    sphereShader = LoadShaders(SPHERE_VERT,SPHERE_FRAG);
+	terrainShader = LoadShaders(TERRAIN_VERT, TERRAIN_FRAG);
    
 }
 
@@ -169,6 +176,7 @@ void Window::clean_up()
 	glDeleteProgram(skyboxShader);
 	glDeleteProgram(reflectShader);
     glDeleteProgram(sphereShader);
+	glDeleteProgram(terrainShader);
 
 }
 
@@ -253,8 +261,8 @@ void Window::display_callback(GLFWwindow* window)
 	//calculateFrustum();
 	// Use the shader of programID
 	glUseProgram(skyboxShader);
-	cube->draw(skyboxShader);
-	
+	//cube->draw(skyboxShader);
+	terrain->draw(terrainShader);
 	
 
 
