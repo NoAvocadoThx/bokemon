@@ -146,7 +146,7 @@ void Window::initialize_objects()
 	cube = new Cube();
 
 	terrain = new Terrain();
-	
+	terrain->translate(glm::vec3(-terrain->vertexCount / 2, -10, -terrain->vertexCount));
 	
 	//define points
 	//c0
@@ -172,6 +172,7 @@ void Window::clean_up()
 {
 	delete(cube);
 	delete(currObj);
+	delete(terrain);
 	glDeleteProgram(shaderProgram);
 	glDeleteProgram(skyboxShader);
 	glDeleteProgram(reflectShader);
@@ -262,6 +263,7 @@ void Window::display_callback(GLFWwindow* window)
 	// Use the shader of programID
 	glUseProgram(skyboxShader);
 	//cube->draw(skyboxShader);
+	glUseProgram(terrainShader);
 	terrain->draw(terrainShader);
 	
 
