@@ -148,7 +148,7 @@ void Window::initialize_objects()
 	//sphere = new Geometry("../eyeball_s.obj");
 	//sphere->isSphere = true;
 	ball = new ROBObject(BALL_PATH);
-	body1 = new ROBObject(body_PATH);
+	body1 = new ROBObject(BODY_PATH);
 	/*
 	ballmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	ballmtx->addChild(ball);
@@ -284,13 +284,13 @@ void Window::display_callback(GLFWwindow* window)
 	//calculateFrustum();
 	// Use the shader of programID
 	glUseProgram(skyboxShader);
-	ball->draw(skyboxShader);
+	//ball->draw(skyboxShader);
 	//cube->draw(skyboxShader);
 	glUseProgram(terrainShader);
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
-	
+	ball->draw(shaderProgram);
 	//modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
