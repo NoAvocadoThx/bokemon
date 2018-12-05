@@ -31,6 +31,7 @@
     <ClInclude Include="..\Cube.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\Plane.h" />
+    <ClInclude Include="..\ROBObject.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\stb_image.h" />
     <ClInclude Include="..\Terrain.h" />
@@ -49,6 +50,7 @@
     <ClCompile Include="..\Cube.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\Plane.cpp" />
+    <ClCompile Include="..\ROBObject.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\stb_image.cpp" />
     <ClCompile Include="..\Terrain.cpp" />
@@ -73,7 +75,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EBF1E546-3F93-49DB-BD9A-B629C3C6DCB0}</ProjectGuid>
     <RootNamespace>GLFWStarterProject</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

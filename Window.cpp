@@ -35,9 +35,12 @@ OBJObject *RC;
 OBJObject *currObj;
 OBJObject *sphere;
 
+
+Geometry *ball;
+Geometry *body1,*body2,*body3;
+
 //culling sphere
 //Geometry *sphere;
-
 //bezier curves
 Curve *c0;
 Curve *c1;
@@ -50,10 +53,11 @@ Curve *c7;
 
 
 
-Transform * modelMtx;
+Transform * modelMtx, * modelballMtx, *modelbody1Mtx, *modelbody2Mtx, *modelbody3Mtx;
 Transform * singleArmy;
 Transform * army;
-
+Transform * ballmtx;
+Transform * body1mtx, *body2mtx, * body3mtx;
 GLfloat size = 1.0f;
 GLint OBJMode = 1;
 GLint ptCount = 0;
@@ -114,7 +118,8 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define SPHERE_FRAG "../sphereShader.frag"
 #define TERRAIN_VERT "../selectShader.vert"
 #define TERRAIN_FRAG "../selectShader.frag"
-
+#define BALL_PATH "../ball.obj"
+#define BODY_PATH "../body.obj"
 
 // Default camera parameters
 glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
@@ -142,21 +147,36 @@ void Window::initialize_objects()
 	//culling sphere
 	//sphere = new Geometry("../eyeball_s.obj");
 	//sphere->isSphere = true;
-	
+	ball = new Geometry(BALL_PATH);
+	ballmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	ballmtx->addChild(ball);
+
+	body1 = new Geometry(BODY_PATH);
+	body1mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	body1mtx->addChild(body1);
+
+	body2 = new Geometry(BODY_PATH);
+	body2mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	body2mtx->addChild(body2);
+
+	body3 = new Geometry(BODY_PATH);
+	body3mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	body3mtx->addChild(body3); 
+
 	cube = new Cube();
 
 	terrain = new Terrain();
 	terrain->translate(glm::vec3(-terrain->vertexCount / 2, -10, -terrain->vertexCount));
 	
-	//define points
-	//c0
-	
 
-	
-	//push control points
-	
-
-	
+	modelballMtx = new Transform(glm::mat4(1.0f));
+	modelballMtx->addChild(ballmtx);
+	/*
+	modelbod1mtx;
+	modelMtx->addChild(body1mtx);
+	modelMtx->addChild(body2mtx);
+	modelMtx->addChild(body3mtx);
+	*/
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	skyboxShader = LoadShaders(SKYBOX_VERT, SKYBOX_FRAG);
@@ -266,8 +286,8 @@ void Window::display_callback(GLFWwindow* window)
 	glUseProgram(terrainShader);
 	terrain->draw(terrainShader);
 	
-
-
+	glUseProgram(shaderProgram);
+	modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -294,88 +314,8 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 	
 
-		//change the color
-		if (key == GLFW_KEY_R) {
-			if (nToggle) {
-				rider = false;
-				nToggle = !nToggle;
-			}
-			else {
-				rider = true;
-				nToggle = !nToggle;
-			}
-		}
-		//color change
-	
-		//direction Light toggle
-		if (key == GLFW_KEY_3) {
-			
-			currObj->ifDirSource = true;
-			
-			if (dirToggle) {
-				currObj->dirOn = 1;
-				dirToggle = !dirToggle;
-			}
-			else {
-				currObj->dirOn = 0;
-				dirToggle = !dirToggle;
-			}
-		}
 		
 		
-		//make spot light narrow or wider
-		if (key == GLFW_KEY_W) {
-
-			if (mods == GLFW_MOD_SHIFT) {
-				
-				currObj->sptCutOff += 1.0f;
-				currObj->sptCutOff2 += 1.0f;
-			}
-			else {
-				currObj->sptCutOff -= 1.0f;
-				currObj->sptCutOff2 -= 1.0f;
-			}
-		}
-		//sharpen or make spot light blurrier
-		if (key == GLFW_KEY_E) {
-
-			if (mods == GLFW_MOD_SHIFT) {
-				if (currObj->sptCutOff2-currObj->sptCutOff>=0.5f) {
-					currObj->sptCutOff += 0.5f;
-					//currObj->sptCutOff2 += 1.1f;
-				}
-			}
-			else {
-				if (currObj->sptCutOff >= 2.0f){
-					currObj->sptCutOff -= 0.5f;
-				//currObj->sptCutOff2 -= 1.0f;
-			    }
-		     }
-		}
-			//object rotation on/off
-		if (key == GLFW_KEY_0) {
-
-			if (currObj->objRotation) {
-				currObj->objRotation = false;
-					
-			}
-			else {
-				currObj->objRotation = true;
-					
-			}
-		}
-		//point light rotation switch
-		if (key == GLFW_KEY_1) {
-
-			if (currObj->ptRot) {
-				currObj->ptRot = false;
-
-			}
-			else {
-				currObj->ptRot = true;
-
-			}
-		}
 		//spot light rotation switch
 		if (key == GLFW_KEY_2) {
 
@@ -387,47 +327,6 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 				currObj->sptRot = true;
 
 			}
-		}
-		//debug mode switch
-		if (key == GLFW_KEY_D) {
-
-			if (nToggle) {
-				debugMode = false;
-				nToggle = !nToggle;
-			}
-			else {
-				debugMode = true;
-				nToggle = !nToggle;
-			}
-
-
-		}
-		//cull mode switch
-		if (key == GLFW_KEY_C) {
-
-			if (nToggle) {
-				cull = false;
-				nToggle = !nToggle;
-			}
-			else {
-				cull = true;
-				nToggle = !nToggle;
-			}
-
-		}
-		
-		//render sphere
-		if (key == GLFW_KEY_S) {
-
-			if (nToggle) {
-				selection = false;
-				nToggle = !nToggle;
-			}
-			else {
-				selection = true;
-				nToggle = !nToggle;
-			}
-
 		}
 
 
@@ -470,8 +369,39 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		
 
 	}
-}
 
+	if (action == GLFW_PRESS || action == GLFW_REPEAT)
+	{
+
+		//Camera movement controls (FPS style)
+		if (key == GLFW_KEY_W)	//Forward
+		{
+			translateCamera({ 0.0f,0.0f,1.0f });
+			//cout << "Z" << mods << endl;
+		}
+		else if (key == GLFW_KEY_S) //Back
+		{
+
+			translateCamera({ 0.0f,0.0f,-1.0f });
+
+		}
+		//cout << "z" << endl;
+		else if (key == GLFW_KEY_A) //Left
+		{
+			translateCamera({ 1.0f,0.0f,0.0f });
+			//cout << "X" << mods << endl;
+		}
+		else if (key == GLFW_KEY_D) //Right
+		{
+			translateCamera({ -1.0f,0.0f,0.0f });
+			//cout << "x" << endl;
+		}
+	}
+
+}
+void Window::translateCamera(glm::vec3 transVec) {
+	V = glm::translate(glm::mat4(1.0f), transVec) * V;
+}
 void Window::scroll_callback(GLFWwindow* window, double x, double y) {
 	
 
