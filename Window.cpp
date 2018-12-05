@@ -37,7 +37,7 @@ OBJObject *sphere;
 
 
 ROBObject *ball;
-Geometry *body1,*body2,*body3;
+ROBObject *body1,*body2,*body3;
 
 //culling sphere
 //Geometry *sphere;
@@ -148,6 +148,7 @@ void Window::initialize_objects()
 	//sphere = new Geometry("../eyeball_s.obj");
 	//sphere->isSphere = true;
 	ball = new ROBObject(BALL_PATH);
+	body1 = new ROBObject(body_PATH);
 	/*
 	ballmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	ballmtx->addChild(ball);
@@ -169,9 +170,9 @@ void Window::initialize_objects()
 	terrain = new Terrain();
 	terrain->translate(glm::vec3(-terrain->vertexCount / 2, -10, -terrain->vertexCount));
 	
-
+/*
 	modelballMtx = new Transform(glm::mat4(1.0f));
-	modelballMtx->addChild(ballmtx);
+	modelballMtx->addChild(ballmtx);*/
 	/*
 	modelbod1mtx;
 	modelMtx->addChild(body1mtx);
@@ -283,12 +284,13 @@ void Window::display_callback(GLFWwindow* window)
 	//calculateFrustum();
 	// Use the shader of programID
 	glUseProgram(skyboxShader);
+	ball->draw(skyboxShader);
 	//cube->draw(skyboxShader);
 	glUseProgram(terrainShader);
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
-	ball->draw(shaderProgram);
+	
 	//modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
