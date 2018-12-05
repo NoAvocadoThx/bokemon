@@ -29,14 +29,10 @@ OBJObject *currObj;
 OBJObject *sphere;
 
 
-<<<<<<< HEAD
 
-Geometry *ball;
-Geometry *body1,*body2,*body3;
-=======
 ROBObject *ball;
 ROBObject *body1,*body2,*body3;
->>>>>>> 0ce91abc6bb90b1d8b55b0e88de02ebab3742a5b
+
 
 //culling sphere
 //Geometry *sphere;
@@ -165,34 +161,19 @@ void Window::initialize_objects()
 	body3 = new Geometry(BODY_PATH);
 	body3mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	body3mtx->addChild(body3); 
-<<<<<<< HEAD
+*/
 	
 	int seed = rand();
 	generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
-=======
-*/
->>>>>>> 0ce91abc6bb90b1d8b55b0e88de02ebab3742a5b
+
+
+
 	cube = new Cube();
 
 	terrain = new Terrain(generator);
 	terrain->translate(glm::vec3(-terrain->vertexCount / 2, -10, -terrain->vertexCount));
 	
-/*
-	modelballMtx = new Transform(glm::mat4(1.0f));
-<<<<<<< HEAD
-	modelballMtx->addChild(ballmtx);
-	
-	//modelbod1mtx;
-	/*modelMtx->addChild(body1mtx);
-=======
-	modelballMtx->addChild(ballmtx);*/
-	/*
-	modelbod1mtx;
-	modelMtx->addChild(body1mtx);
->>>>>>> 0ce91abc6bb90b1d8b55b0e88de02ebab3742a5b
-	modelMtx->addChild(body2mtx);
-	modelMtx->addChild(body3mtx);*/
-	
+
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	skyboxShader = LoadShaders(SKYBOX_VERT, SKYBOX_FRAG);
@@ -298,18 +279,14 @@ void Window::display_callback(GLFWwindow* window)
 	//calculateFrustum();
 	// Use the shader of programID
 	glUseProgram(skyboxShader);
-<<<<<<< HEAD
-	cube->draw(skyboxShader);
-=======
-	//ball->draw(skyboxShader);
+
 	//cube->draw(skyboxShader);
->>>>>>> 0ce91abc6bb90b1d8b55b0e88de02ebab3742a5b
+
 	glUseProgram(terrainShader);
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
 	ball->draw(shaderProgram);
-	//modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
