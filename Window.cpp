@@ -36,7 +36,7 @@ OBJObject *currObj;
 OBJObject *sphere;
 
 
-Geometry *ball;
+ROBObject *ball;
 Geometry *body1,*body2,*body3;
 
 //culling sphere
@@ -147,7 +147,8 @@ void Window::initialize_objects()
 	//culling sphere
 	//sphere = new Geometry("../eyeball_s.obj");
 	//sphere->isSphere = true;
-	ball = new Geometry(BALL_PATH);
+	ball = new ROBObject(BALL_PATH);
+	/*
 	ballmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	ballmtx->addChild(ball);
 
@@ -162,7 +163,7 @@ void Window::initialize_objects()
 	body3 = new Geometry(BODY_PATH);
 	body3mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	body3mtx->addChild(body3); 
-
+*/
 	cube = new Cube();
 
 	terrain = new Terrain();
@@ -287,7 +288,8 @@ void Window::display_callback(GLFWwindow* window)
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
-	modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
+	ball->draw(shaderProgram);
+	//modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
