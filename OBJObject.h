@@ -100,12 +100,7 @@ public:
 	void translate(glm::vec3);
 	void scaleSize(GLfloat);
 	unsigned int loadCubemap(std::vector<std::string> faces);
-	GLfloat randomFloat(GLfloat a, GLfloat b) {
-		GLfloat random = ((GLfloat)rand()) / (GLfloat)RAND_MAX;
-		GLfloat diff = b - a;
-		GLfloat r = random * diff;
-		return a + r;
-	}
+
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
 	void loadTexture(unsigned char* tdata);
 };

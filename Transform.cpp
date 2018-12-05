@@ -46,7 +46,7 @@ void Transform::update() {
 		Node* child = *itr; 
 		child->update();
 	}
-	if (count < 300) {
+/*	if (count < 300) {
 		if (islArm) {
 			walk(0.035f);
 
@@ -114,7 +114,7 @@ void Transform::update() {
 		browCount = 0;
 	}
 	count++;
-	browCount++;
+	browCount++;*/
 }
 void Transform::walk(float speed) {
 	M = M*glm::rotate(glm::mat4(1.0f), sin(speed), glm::vec3(1.0f, 0.0f, 0.0f));

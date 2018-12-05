@@ -16,11 +16,10 @@ std::vector<glm::vec3> terrainNormals(sz);
 GLuint terrainTexture[1];
 GLuint texture0;
 
-Terrain::Terrain() {
+Terrain::Terrain(HeightGenerator* gen) {
 	toWorld = glm::mat4(1.0f);
-	
-	generateTerrain();
-	std::string str("../grass2.ppm");
+	generateTerrain(gen);
+	std::string str("../ground3.ppm");
 	if(str.c_str()==NULL){
 		std::cout << "null" << std::endl;
 		exit(1);
@@ -72,9 +71,10 @@ Terrain::~Terrain() {
 	glDeleteBuffers(1, &EBO);
 	glDeleteBuffers(1, &Norms);
 	glDeleteBuffers(1, &TO);
+	
 }
 
-void Terrain::generateTerrain() {
+void Terrain::generateTerrain(HeightGenerator* generator) {
 	int i = 0;
 	tVertices = new GLfloat[sz * 3];
 	tNormals = new GLfloat[sz * 3];
@@ -98,12 +98,14 @@ void Terrain::generateTerrain() {
 				tris.push_back(tri2);
 			}
 			i++;*/
+			float height = getHeight(x, z, generator);
 			tVertices[i * 3] = (float)x / ((float)lRes - 1)*size;
-			tVertices[i * 3 + 1] = 0;
+			tVertices[i * 3 + 1] = height;
 			tVertices[i * 3 + 2] = (float)z / ((float)wRes - 1)*size;
-			tNormals[i * 3] = 0;
-			tNormals[i * 3 + 1] = 1;
-			tNormals[i * 3 + 2] = 0;
+			glm::vec3 norm = calculateNormal(x, z, generator);
+			tNormals[i * 3] = norm.x;
+			tNormals[i * 3 + 1] = norm.y;
+			tNormals[i * 3 + 2] = norm.z;
 			textureCoords[i * 2] = (float)x / ((float)lRes - 1);
 			textureCoords[i * 2 + 1] = (float)z / (float)wRes - 1;
 			i++;
@@ -254,7 +256,7 @@ GLuint Terrain::loadTexture2(const char *textureFile) {
 
 	int width, height, nrChannels;
 	unsigned char *data = stbi_load(textureFile, &width, &height, &nrChannels, 0);
-	if (data) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+	if (data) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	else std::cout << "Image failed to load at path: " << textureFile << std::endl;
 	stbi_image_free(data);
 
@@ -270,4 +272,18 @@ GLuint Terrain::loadTexture2(const char *textureFile) {
 void Terrain::translate(glm::vec3 transVec)
 {
 	toWorld = glm::translate(glm::mat4(1.0f), transVec) * toWorld;
+}
+
+glm::vec3 Terrain::calculateNormal(int x, int z, HeightGenerator *generator) {
+	//height of left,right, up, down
+	float heightL = getHeight(x - 1, z, generator);
+	float heightR = getHeight(x + 1, z, generator);
+	float heightD = getHeight(x, z - 1, generator);
+	float heightU = getHeight(x, z + 1, generator);
+	glm::vec3 normal = glm::vec3(heightL - heightR, 1.0f, heightD - heightU);
+	return glm::normalize(normal);
+}
+
+float Terrain::getHeight(int x, int z, HeightGenerator *generator) {
+	return generator->genHeight(x, z);
 }

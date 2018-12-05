@@ -1,12 +1,5 @@
 #include "window.h"
-#include "OBJObject.h"
-#include "Geometry.h"
-#include "Transform.h"
-#include "Terrain.h"
-#include <algorithm>
-#include <iostream>
-#include "Curve.h"
-#include <cmath>
+
 
 
 
@@ -34,6 +27,7 @@ GLuint VBO, VAO, VAO2, VBO2;
 OBJObject *RC;
 OBJObject *currObj;
 OBJObject *sphere;
+
 
 
 Geometry *ball;
@@ -76,9 +70,11 @@ vector<glm::vec3> anchor;
 vector<glm::vec3> ctrPts;
 vector<glm::vec3> selectPts;
 glm::vec3 currPt;
-glm::vec3 selectColor= glm::vec3(0.1f, 0.9f, 0.1f);
+glm::vec3 selectColor= glm::vec3(0.4f, 0.3f, 0.1f);
 
 Terrain *terrain;
+HeightGenerator *generator;
+GLint vertexCount = 128;
 
 bool left_release=true;
 //toggle parameter
@@ -162,21 +158,23 @@ void Window::initialize_objects()
 	body3 = new Geometry(BODY_PATH);
 	body3mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	body3mtx->addChild(body3); 
-
+	
+	int seed = rand();
+	generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
 	cube = new Cube();
 
-	terrain = new Terrain();
+	terrain = new Terrain(generator);
 	terrain->translate(glm::vec3(-terrain->vertexCount / 2, -10, -terrain->vertexCount));
 	
 
 	modelballMtx = new Transform(glm::mat4(1.0f));
 	modelballMtx->addChild(ballmtx);
-	/*
-	modelbod1mtx;
-	modelMtx->addChild(body1mtx);
+	
+	//modelbod1mtx;
+	/*modelMtx->addChild(body1mtx);
 	modelMtx->addChild(body2mtx);
-	modelMtx->addChild(body3mtx);
-	*/
+	modelMtx->addChild(body3mtx);*/
+	
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	skyboxShader = LoadShaders(SKYBOX_VERT, SKYBOX_FRAG);

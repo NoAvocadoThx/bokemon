@@ -14,6 +14,15 @@
 #include "shader.h"
 #include "Plane.h"
 #include "ROBObject.h"
+#include "HeightGenerator.h"
+#include "OBJObject.h"
+#include "Geometry.h"
+#include "Transform.h"
+#include "Terrain.h"
+#include <algorithm>
+#include <iostream>
+#include "Curve.h"
+#include <cmath>
 
 #define ANG2RAD 3.14159265358979323846/180.0f
 

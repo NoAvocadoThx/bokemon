@@ -16,6 +16,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+#include "HeightGenerator.h"
 
 
 
@@ -44,14 +45,16 @@ public:
 	GLint theight = 512;
 	Terrain::Terrain(int,int);
 	Terrain::Terrain();
+	Terrain::Terrain(HeightGenerator*);
 	Terrain::~Terrain();
-	void generateTerrain();
+	void generateTerrain(HeightGenerator*);
 	void draw(GLuint);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
 	void loadTexture(unsigned char* tdata);
 	GLuint loadTexture2(const char *textureFile);
 	void Terrain::translate(glm::vec3 transVec);
-
+	glm::vec3 calculateNormal(int x, int z, HeightGenerator*);
+	float getHeight(int x, int z, HeightGenerator*);
 };
 
 
