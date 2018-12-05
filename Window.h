@@ -13,7 +13,7 @@
 #include "Cube.h"
 #include "shader.h"
 #include "Plane.h"
-
+#include "ROBObject.h"
 
 #define ANG2RAD 3.14159265358979323846/180.0f
 
@@ -48,7 +48,8 @@ public:
 	static GLuint select(int xx, int yy);
 	static void move();
 	static void calculate();
-
+	static void translateCamera(glm::vec3 transVec);
+	static void resetCamera();
 };
 
 #endif
