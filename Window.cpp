@@ -262,7 +262,7 @@ void Window::display_callback(GLFWwindow* window)
 	//calculateFrustum();
 	// Use the shader of programID
 	glUseProgram(skyboxShader);
-	//cube->draw(skyboxShader);
+	cube->draw(skyboxShader);
 	glUseProgram(terrainShader);
 	terrain->draw(terrainShader);
 	

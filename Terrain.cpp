@@ -13,7 +13,7 @@ std::vector<glm::vec3> terrainVertices(sz);
 std::vector<glm::vec3> terrainNormals(sz);
 
 
-//GLuint terrainTexture[1];
+GLuint terrainTexture[1];
 GLuint texture0;
 
 Terrain::Terrain() {
@@ -57,7 +57,7 @@ Terrain::Terrain() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(*index) * 6 * (lRes - 1)*(wRes - 1) , index, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() *sizeof(unsigned int) , indices.data(), GL_STATIC_DRAW);
 	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	// Unbind the VAO now so we don't accidentally tamper with it.
@@ -117,18 +117,18 @@ void Terrain::generateTerrain() {
 			int topRight = (topLeft + 1);
 			int bottomLeft = ((iz + 1)*lRes) + ix;
 			int bottomRight = bottomLeft + 1;
-			/*indices.push_back(topLeft);
+			indices.push_back(topLeft);
 			indices.push_back(bottomLeft);
 			indices.push_back(topRight);
 			indices.push_back(topRight);
 			indices.push_back(bottomLeft);
-			indices.push_back(bottomRight);*/
-			index[count++] = topLeft;
+			indices.push_back(bottomRight);
+			/*index[count++] = topLeft;
 			index[count++] = bottomLeft;
 			index[count++] = topRight;
 			index[count++] = topRight;
 			index[count++] = bottomLeft;
-			index[count++] = bottomRight;
+			index[count++] = bottomRight;*/
 			
 		}
 	}
@@ -232,10 +232,10 @@ void Terrain::loadTexture(unsigned char* tdata)
 	if (tdata == NULL) return;
 
 	// Create ID for texture
-	/*glGenTextures(1, &terrainTexture[0]);
+	glGenTextures(1, &terrainTexture[0]);
 	glActiveTexture(terrainTexture[0]);
 	// Set this texture to be the one we are working with
-	glBindTexture(GL_TEXTURE_2D, terrainTexture[0]);*/
+	glBindTexture(GL_TEXTURE_2D, terrainTexture[0]);
 
 	// Generate the texture
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, twidth, theight, 0, GL_RGB, GL_UNSIGNED_BYTE, tdata);
