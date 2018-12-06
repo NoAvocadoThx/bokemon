@@ -113,8 +113,8 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define CURVE_FRAG "../curveShader.frag"
 #define SPHERE_VERT "../sphereShader.vert"
 #define SPHERE_FRAG "../sphereShader.frag"
-#define TERRAIN_VERT "../selectShader.vert"
-#define TERRAIN_FRAG "../selectShader.frag"
+#define TERRAIN_VERT "../terrainShader.vert"
+#define TERRAIN_FRAG "../terrainShader.frag"
 #define BALL_PATH "../ball.obj"
 #define BODY_PATH "../body.obj"
 
@@ -171,8 +171,8 @@ void Window::initialize_objects()
 	cube = new Cube();
 
 	terrain = new Terrain(generator);
-	terrain->translate(glm::vec3(-terrain->vertexCount / 2, -10, -terrain->vertexCount));
-	
+	terrain->translate(glm::vec3(-terrain->vertexCount , -10, -terrain->vertexCount));
+	terrain->scaleSize(2.0f,1.0f,2.0f);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -280,13 +280,13 @@ void Window::display_callback(GLFWwindow* window)
 	// Use the shader of programID
 	glUseProgram(skyboxShader);
 
-	//cube->draw(skyboxShader);
+	cube->draw(skyboxShader);
 
 	glUseProgram(terrainShader);
 	terrain->draw(terrainShader);
 	
-	glUseProgram(shaderProgram);
-	ball->draw(shaderProgram);
+	//glUseProgram(shaderProgram);
+	//ball->draw(shaderProgram);
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();

@@ -20,11 +20,12 @@ HeightGenerator::HeightGenerator(int gridX, int gridZ, int vertexCount, int seed
 
 GLfloat HeightGenerator::genHeight(int x, int z) {
 	GLfloat total = 0;
+	GLfloat t = 16.0f;
 	float d = (float)pow(2, OCTAVES - 1);
 	for (int i = 0; i < OCTAVES; i++) {
 		float freq = (float)(pow(2, i) / d);
 		float amp = (float)pow(ROUGHNESS, i) * AMP;
-		total += getInterpolatedNoise((x + xOffset)*freq/32.0f, (z + zOffset)*freq/32.0f) * amp/2.0f;
+		total += getInterpolatedNoise(((float)(x + xOffset)*freq), ((float)(z + zOffset)*freq)) * amp;
 	}
 	return total;
 }
@@ -52,14 +53,14 @@ float HeightGenerator::interpolate(float a, float b, float blend) {
 
 float HeightGenerator::getSmoothNoise(int x, int z) {
 	float corners = (getNoise(x - 1, z - 1) + getNoise(x + 1, z - 1) + getNoise(x - 1, z + 1)
-		+ getNoise(x + 1, z + 1)) / 16.0f;
+		+ getNoise(x + 1, z + 1)) / 100.0f;
 	float sides = (getNoise(x - 1, z) + getNoise(x + 1, z) + getNoise(x, z - 1)
-		+ getNoise(x, z + 1)) / 8.0f;
-	float center = getNoise(x, z) / 4.0f;
+		+ getNoise(x, z + 1)) / 80.0f;
+	float center = getNoise(x, z) / 900.0f;
 	return corners + sides + center;
 }
 
 float HeightGenerator::getNoise(int x, int z) {
-	seed = x * 32632 + z * 324176 + seed;
+	seed = x * 49654 + z * 324176 + seed;
 	return ((double)rand() / (RAND_MAX)) * 2.0f - 1.0f;
 }

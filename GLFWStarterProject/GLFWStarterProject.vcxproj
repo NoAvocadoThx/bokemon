@@ -72,6 +72,8 @@
     <None Include="..\shader.vert" />
     <None Include="..\sphereShader.frag" />
     <None Include="..\sphereShader.vert" />
+    <None Include="..\terrainShader.frag" />
+    <None Include="..\terrainShader.vert" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

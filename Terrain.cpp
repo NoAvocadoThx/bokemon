@@ -15,17 +15,12 @@ std::vector<glm::vec3> terrainNormals(sz);
 
 GLuint terrainTexture[1];
 GLuint texture0;
+GLuint texture1;
 
 Terrain::Terrain(HeightGenerator* gen) {
 	toWorld = glm::mat4(1.0f);
 	generateTerrain(gen);
-	std::string str("../ground3.ppm");
-	if(str.c_str()==NULL){
-		std::cout << "null" << std::endl;
-		exit(1);
-	}
-	//unsigned char* tdata = loadPPM(str.c_str(), twidth, theight);
-	texture0 = loadTexture2(str.c_str());
+	loadTexture2();
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -99,9 +94,12 @@ void Terrain::generateTerrain(HeightGenerator* generator) {
 			}
 			i++;*/
 			float height = getHeight(x, z, generator);
-			tVertices[i * 3] = (float)x / ((float)lRes - 1)*size;
-			tVertices[i * 3 + 1] = height;
-			tVertices[i * 3 + 2] = (float)z / ((float)wRes - 1)*size;
+			
+				tVertices[i * 3] = (float)x / ((float)lRes - 1)*size;
+				tVertices[i * 3 + 1] = height;
+				tVertices[i * 3 + 2] = (float)z / ((float)wRes - 1)*size;
+			
+			
 			glm::vec3 norm = calculateNormal(x, z, generator);
 			tNormals[i * 3] = norm.x;
 			tNormals[i * 3 + 1] = norm.y;
@@ -162,7 +160,10 @@ void Terrain::draw(GLuint shaderProgram)
 	glBindVertexArray(VAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture0);
-	glUniform1i(glGetUniformLocation(shaderProgram, "myTextureSampler"), 0);
+	glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture1);
+	glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 	//glDrawArrays(GL_TRIANGLES, 0, sizeof(*tVertices));
 	// Tell OpenGL to draw with triangles, using indices.size() indices, the type of the indices, and the offset to start from
 	glDrawElements(GL_TRIANGLES, 6 * (lRes - 1)*(wRes - 1), GL_UNSIGNED_INT, 0);
@@ -248,16 +249,23 @@ void Terrain::loadTexture(unsigned char* tdata)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 }
-GLuint Terrain::loadTexture2(const char *textureFile) {
+GLuint Terrain::loadTexture2() {
+	std::string str("../terrain1.ppm");
+	if (str.c_str() == NULL) {
+		std::cout << "null" << std::endl;
+		exit(1);
+	}
+	//unsigned char* tdata = loadPPM(str.c_str(), twidth, theight);
 	//unsigned int textureID;
+	//tetxure 1
 	glGenTextures(1, &texture0);
 
 	glBindTexture(GL_TEXTURE_2D, texture0);
 
 	int width, height, nrChannels;
-	unsigned char *data = stbi_load(textureFile, &width, &height, &nrChannels, 0);
+	unsigned char *data = stbi_load(str.c_str(), &width, &height, &nrChannels, 0);
 	if (data) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	else std::cout << "Image failed to load at path: " << textureFile << std::endl;
+	else std::cout << "Image failed to load at path: " << str.c_str() << std::endl;
 	stbi_image_free(data);
 
 	glGenerateMipmap(GL_TEXTURE_2D);  // Generate mipmaps
@@ -265,8 +273,25 @@ GLuint Terrain::loadTexture2(const char *textureFile) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+    //texture 2
+	std::string str2("../terrain2.ppm");
+	glGenTextures(1, &texture1);
 
-	return texture0;
+	glBindTexture(GL_TEXTURE_2D, texture1);
+
+	
+	data = stbi_load(str2.c_str(), &width, &height, &nrChannels, 0);
+	if (data) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	else std::cout << "Image failed to load at path: " << str2.c_str() << std::endl;
+	stbi_image_free(data);
+
+	glGenerateMipmap(GL_TEXTURE_2D);  // Generate mipmaps
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Terrain::translate(glm::vec3 transVec)
@@ -280,10 +305,15 @@ glm::vec3 Terrain::calculateNormal(int x, int z, HeightGenerator *generator) {
 	float heightR = getHeight(x + 1, z, generator);
 	float heightD = getHeight(x, z - 1, generator);
 	float heightU = getHeight(x, z + 1, generator);
-	glm::vec3 normal = glm::vec3(heightL - heightR, 1.0f, heightD - heightU);
+	glm::vec3 normal = glm::vec3(heightL - heightR, 2.0f, heightD - heightU);
 	return glm::normalize(normal);
 }
 
 float Terrain::getHeight(int x, int z, HeightGenerator *generator) {
 	return generator->genHeight(x, z);
+}
+
+void Terrain::scaleSize(GLfloat scaleV,GLfloat b,GLfloat c) {
+
+	toWorld = toWorld * glm::scale(glm::mat4(1.0f), glm::vec3(scaleV, b, c));
 }

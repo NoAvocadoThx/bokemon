@@ -23,9 +23,9 @@
 
 class HeightGenerator {
 private:
-	const GLfloat AMP = 30.0f;
+	const GLfloat AMP = 160.0f;
 	const GLint OCTAVES = 5;
-	const GLfloat ROUGHNESS = 0.01f; 
+	const GLfloat ROUGHNESS = 0.05f; 
 	GLint randomInt(GLint a, GLint b) {
 		GLint random = ((GLint)rand()) / (GLint)RAND_MAX;
 		GLint diff = b - a;

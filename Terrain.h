@@ -32,6 +32,7 @@ public:
 	GLint area = vertexCount * vertexCount;
 	std::vector<glm::vec3> tris;
 	std::vector<unsigned int> indices;
+
 	GLuint VBO, VAO, EBO,Norms,TO;
 	GLuint uProjection, uModelview;
 	glm::vec3 position;
@@ -43,6 +44,8 @@ public:
 	const GLfloat length = 10.0f;
 	GLint twidth = 512;
 	GLint theight = 512;
+
+
 	Terrain::Terrain(int,int);
 	Terrain::Terrain();
 	Terrain::Terrain(HeightGenerator*);
@@ -51,10 +54,11 @@ public:
 	void draw(GLuint);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
 	void loadTexture(unsigned char* tdata);
-	GLuint loadTexture2(const char *textureFile);
+	GLuint loadTexture2();
 	void Terrain::translate(glm::vec3 transVec);
 	glm::vec3 calculateNormal(int x, int z, HeightGenerator*);
 	float getHeight(int x, int z, HeightGenerator*);
+	void scaleSize(GLfloat scaleV,GLfloat,GLfloat);
 };
 
 
