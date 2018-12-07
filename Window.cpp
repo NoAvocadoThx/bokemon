@@ -1,9 +1,15 @@
-#include "window.h"
+﻿#include "window.h"
 
 
 
 
-
+// 用于相机交互参数
+GLfloat lastX = Window::width / 2.0f, lastY = Window::height / 2.0f;
+bool firstMouseMove = true;
+bool keyPressedStatus[1024]; // 按键情况记录
+GLfloat deltaTime = 0.0f; // 当前帧和上一帧的时间差
+GLfloat lastFrame = 0.0f; // 上一帧时间
+Camera camera(glm::vec3(0.0f, 0.0f, 4.0f));
 
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
@@ -117,12 +123,7 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define TERRAIN_FRAG "../terrainShader.frag"
 #define BALL_PATH "../ball.obj"
 #define BODY_PATH "../body.obj"
-
-// Default camera parameters
-glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
-glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
-glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
-
+#define HORSE_PATH "../horse.obj"
 
 
 int Window::width;
@@ -133,7 +134,7 @@ glm::mat4 Window::V;
 bool Window::toggleSphere;
 
 
-
+ROBObject *horse;
 void Window::initialize_objects()
 {
 	
@@ -144,6 +145,7 @@ void Window::initialize_objects()
 	//culling sphere
 	//sphere = new Geometry("../eyeball_s.obj");
 	//sphere->isSphere = true;
+	horse = new ROBObject(HORSE_PATH);
 	ball = new ROBObject(BALL_PATH);
 	body1 = new ROBObject(BODY_PATH);
 	/*
@@ -258,8 +260,9 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 	if (height > 0)
 	{
 		//P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
-		P = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 1000.0f);
-		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+		P = glm::perspective(camera.mouse_zoom,
+			(GLfloat)(Window::width) / Window::height, 1.0f, 100.0f);
+		V = camera.getViewMatrix();
 	}
 }
 
@@ -273,6 +276,9 @@ void Window::idle_callback()
 
 void Window::display_callback(GLFWwindow* window)
 {
+	GLfloat currentFrame = (GLfloat)glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
 	glm::vec3 rOrigin;
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -285,8 +291,8 @@ void Window::display_callback(GLFWwindow* window)
 	glUseProgram(terrainShader);
 	terrain->draw(terrainShader);
 	
-	//glUseProgram(shaderProgram);
-	//ball->draw(shaderProgram);
+	glUseProgram(shaderProgram);
+	horse->draw(shaderProgram);
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -375,25 +381,22 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		//Camera movement controls (FPS style)
 		if (key == GLFW_KEY_W)	//Forward
 		{
-			translateCamera({ 0.0f,0.0f,1.0f });
-			//cout << "Z" << mods << endl;
+			camera.handleKeyPress(FORWARD, deltaTime);
 		}
 		else if (key == GLFW_KEY_S) //Back
 		{
 
-			translateCamera({ 0.0f,0.0f,-1.0f });
+			camera.handleKeyPress(BACKWARD, deltaTime);
 
 		}
 		//cout << "z" << endl;
 		else if (key == GLFW_KEY_A) //Left
 		{
-			translateCamera({ 1.0f,0.0f,0.0f });
-			//cout << "X" << mods << endl;
+			camera.handleKeyPress(LEFT, deltaTime);
 		}
 		else if (key == GLFW_KEY_D) //Right
 		{
-			translateCamera({ -1.0f,0.0f,0.0f });
-			//cout << "x" << endl;
+			camera.handleKeyPress(RIGHT, deltaTime);
 		}
 	}
 
@@ -404,15 +407,7 @@ void Window::translateCamera(glm::vec3 transVec) {
 void Window::scroll_callback(GLFWwindow* window, double x, double y) {
 	
 
-		    if (fov >= 1.0f && fov <= 100.0f)
-				fov -= y;
-			if (fov <= 1.0f)
-				fov = 1.0f;
-			if (fov >= 100.0f)
-				fov = 100.0f;
-			P = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 1000.0f);
-		
-		
+	camera.handleMouseScroll(y);
 	
 }
 
@@ -433,7 +428,7 @@ glm::vec3 Window::trackBallMapping(glm::vec2 point)
 void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	//if left mouse button is pressed and hold
 	if (button == GLFW_MOUSE_BUTTON_1) {
-		if (action == GLFW_PRESS) {
+		if (action == GLFW_RELEASE) {
 			left_release = false;
 			glfwGetCursorPos(window, &c_initX, &c_initY);
 			lastPoint = trackBallMapping(glm::vec2(c_initX, c_initY));
@@ -443,7 +438,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 
 		}
 		//if release
-		else if (action == GLFW_RELEASE) {
+		else if (action = GLFW_PRESS) {
 			left_release = true;
 		}
 		
@@ -456,213 +451,19 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 		}
 	}
 }
-void Window::cursor_pos_callback(GLFWwindow* window, double xPos, double yPos) {
-	//if left mouse button is not hold down
-	if (!left_release) {
-		glm::vec3 direction;
-		glm::vec4 newPos;
-		glm::vec4 newPos2;
-		GLfloat angle;
-		glm::vec3 rotationAxis;
-		mouseRot = true;
-		//clear currPoint
-		currPoint = glm::vec3(0,0,0);
-		//get surface location
-		currPoint = trackBallMapping(glm::vec2(xPos, yPos));
-		direction = currPoint - lastPoint;
-		//get the roation axis perpendicular to currPoint X lastPoint 
-		rotationAxis = glm::cross(currPoint, lastPoint);
-		angle = direction.length()*rotationSpeed;
-		float camAngle = glm::dot(lastPoint, currPoint) / (glm::length(lastPoint)*glm::length(currPoint));
-		/*if (camAngle > 1) {
-			camAngle= 1;
-		}*/
-		float degree = acos(camAngle);
-		if (!cameraRotation) {
-			
-
-		}
-		else {
-			CameraRotation(degree, rotationAxis);
-		}
-		
+void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
+	if (firstMouseMove) // 首次鼠标移动
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouseMove = false;
 	}
-	else {
-		//mouseRot = false;
-	}
-	lastPoint = currPoint;
+
+	GLfloat xoffset = xpos - lastX;
+	GLfloat yoffset = lastY - ypos;
+
+	lastX = xpos;
+	lastY = ypos;
+
+	camera.handleMouseMove(xoffset, yoffset);
 }
-void Window::CameraRotation(float angle, glm::vec3 rotAxis) {
-	cam_pos = glm::rotate(glm::mat4(1.0f), (30.0f*angle * glm::pi<float>()) / 180.0f, rotAxis)*glm::vec4(cam_pos, 1.0);
-	cam_up = glm::rotate(glm::mat4(1.0f), (30.0f*angle * glm::pi<float>()) / 180.0f, rotAxis)*glm::vec4(cam_up, 1.0);
-	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-
-}
-void Window::calculateFrustum() {
-	nDis = 1.0f;
-	fDis = 30.0f;
-	bool isIn = true;
-	GLfloat distance;
-	glm::vec3 dir, nc, fc, X, Y, Z,d,right,up;
-	GLfloat tang = (GLfloat)tan(45.0f*ANG2RAD*0.5f);
-	nh = 2.0f * tan(fov / 2.0f)*nDis;
-	nw = nh * (float)width / (float)height;
-	fh = 2.0f*tan(fov / 2.0f)*fDis;
-	fw = fh * (float)width / (float)height;
-
-	Z = cam_pos - cam_look_at;
-	Z = glm::normalize(Z);
-	d = glm::normalize(cam_look_at-cam_pos);
-	up = glm::normalize(cam_up);
-	right = glm::cross(d, up);
-	X = cam_up * Z;
-	X = glm::normalize(X);
-	Y = Z * X;
-	//nc = cam_pos - Z * nDis;
-	fc = cam_pos + d * fDis;
-	nc = cam_pos + d * nDis;
-	/*fc = cam_pos - Z * fDis;
-	fc = cam_pos + cam_look_at * fDis;
-	ntl = nc + Y * nh - X * nw;
-	ntr = nc + Y * nh + X * nw;
-	nbl = nc - Y * nh - X * nw;
-	nbr = nc - Y * nh + X * nw;
-
-	ftl = fc + Y * fh - X * fw;
-	ftr = fc + Y * fh + X * fw;
-	fbl = fc - Y * fh - X * fw;
-	fbr = fc - Y * fh + X * fw;*/
-
-	ftl = fc + (cam_up*(fh/2.0f)) - (right*(fw / 2.0f));
-	ftr = fc + (up*(fh / 2.0f)) + (right*(fw / 2.0f));
-	fbl = fc - (up*(fh / 2.0f)) - (right*(fw / 2.0f));
-	fbr = fc - (up*(fh / 2.0f)) + (right*(fw / 2.0f));
-
-	ntl = nc + (up*(nh / 2.0f)) - (right*(nw / 2.0f));
-	ntr = nc + (up*(nh / 2.0f)) + (right*(nw / 2.0f));
-	nbl = nc - (up*(nh / 2.0f)) - (right*(nw / 2.0f));
-	nbr = nc - (up*(nh / 2.0f)) + (right*(nw / 2.0f));
-
-	//top
-	pl[0].set(ntr, ntl, ftl);
-	//bottom
-	pl[1].set(nbl, nbr, fbr);
-	//left
-	pl[2].set(ntl, nbl, fbl);
-	//right
-	pl[3].set(nbr, ntr, fbr);
-	//nearP
-	pl[4].set(ntl, ntr, nbr);
-	//farP
-	pl[5].set(ftr, ftl, fbl);
-}
-/*bool Window::inFrustum() {
-	GLfloat distance;
-	bool isIn=true;
-	for (int i = 0; i < 6; i++) {
-		distance = pl[i].distance(origin);
-		/*if (distance < -radius) {
-			return false;
-		}
-		else if (distance < radius){
-			isIn = true;
-		}
-		if (distance < 0) {
-			isIn = false;
-		}
-	}
-	return isIn;
-}*/
-bool Window::inViewSpace(glm::vec3 cam_pos, glm::vec3 lookAt, glm::vec3 up,
-	glm::vec3 origin, GLfloat radius) {
-	bool isIn = true;
-	GLfloat distance;
-	glm::vec3 dir, nc, fc, X, Y, Z;
-	GLfloat tang = (GLfloat)tan(45.0f*ANG2RAD*0.5f);
-	nh = nDis * tang;
-	nw = nh;
-	fh = fDis * tang;
-	fw = fh;
-	Z = cam_pos - lookAt;
-	Z = glm::normalize(Z);
-	X = up * Z;
-	X = glm::normalize(X);
-	Y = Z * X;
-	nc = cam_pos - Z * nDis;
-	fc = cam_pos - Z * fDis;
-	fc = cam_pos + lookAt * fDis;
-	ntl = nc + Y * nh - X * nw;
-	ntr = nc + Y * nh + X * nw;
-	nbl = nc - Y * nh - X * nw;
-	nbr = nc - Y * nh + X * nw;
-
-	ftl = fc + Y * fh - X * fw;
-	ftr = fc + Y * fh + X * fw;
-	fbl = fc - Y * fh - X * fw;
-	fbr = fc - Y * fh + X * fw;
-
-
-
-	//top
-	pl[0].set(ntr, ntl, ftl);
-	//bottom
-	pl[1].set(nbl, nbr, fbr);
-	//left
-	pl[2].set(ntl, nbl, fbl);
-	//right
-	pl[3].set(nbr, ntr, fbr);
-	//nearP
-	pl[4].set(ntl, ntr, nbr);
-	//farP
-	pl[5].set(ftr, ftl, fbl);
-
-	for (int i = 0; i < 6; i++) {
-		distance = pl[i].distance(origin);
-		/*if (distance < -radius) {
-			return false;
-		}
-		else if (distance < radius){
-			isIn = true;
-		}*/
-		if (distance < 0) {
-			isIn = false;
-		}
-	}
-	return isIn;
-
-
-
-
-}
-void Window::pushD(GLfloat dis,std::vector<GLfloat> m) {
-	m.push_back(dis);
-}
-
-
-void Window::drawLine(GLuint shaderProgram)
-{
-	glGenVertexArrays(1, &VAO); 
-	glGenBuffers(1, &VBO);
-
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, ctrPts.size() * sizeof(GLfloat) * 3, ctrPts.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0); 
-	glm::mat4 modelview = V;
-	GLuint uProjection = glGetUniformLocation(curveShader, "projection");
-	GLuint uModelview = glGetUniformLocation(curveShader, "modelview");
-	
-
-	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &P[0][0]);
-	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
-	glBindVertexArray(VAO);
-
-	
-	glDrawArrays(GL_LINES, 0, ctrPts.size());
-	glBindVertexArray(0);
-
-
-}
-

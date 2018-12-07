@@ -1,5 +1,8 @@
-#include "main.h"
-
+﻿#include "main.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>                  // ...so now that's defined we can import GLM itself.
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 GLFWwindow* window;
 
 void error_callback(int error, const char* description)
@@ -22,6 +25,8 @@ void setup_callbacks()
 	glfwSetMouseButtonCallback(window, Window::mouse_button_callback);
 	//set cursor position callback
 	glfwSetCursorPosCallback(window, Window::cursor_pos_callback);
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void setup_glew()
@@ -82,6 +87,15 @@ int main(void)
 	setup_opengl_settings();
 	// Initialize objects/pointers for rendering
 	Window::initialize_objects();
+	glewExperimental = GL_TRUE; 
+	GLenum status = glewInit();
+	if (status != GLEW_OK)
+	{
+		std::cout << "Error::GLEW glew version:" << glewGetString(GLEW_VERSION)
+			<< " error string:" << glewGetErrorString(status) << std::endl;
+		glfwTerminate();
+		return -1;
+	}
 
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))

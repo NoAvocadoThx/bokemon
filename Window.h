@@ -23,7 +23,11 @@
 #include <iostream>
 #include "Curve.h"
 #include <cmath>
-
+#include "camera.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>                  // ...so now that's defined we can import GLM itself.
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 #define ANG2RAD 3.14159265358979323846/180.0f
 
 class Window
