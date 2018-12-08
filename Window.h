@@ -36,6 +36,7 @@ private:
 	
 public:
 	static std::vector<GLfloat> distanceVec;
+	static bool SPHERE_SHOW;
 	static int width;
 	static int height;
 	static glm::mat4 P; // P for projection

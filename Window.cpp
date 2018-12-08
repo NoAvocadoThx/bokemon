@@ -1,18 +1,16 @@
 ﻿#include "window.h"
 
 
-
-
-// 用于相机交互参数
 GLfloat lastX = Window::width / 2.0f, lastY = Window::height / 2.0f;
 bool firstMouseMove = true;
-bool keyPressedStatus[1024]; // 按键情况记录
-GLfloat deltaTime = 0.0f; // 当前帧和上一帧的时间差
-GLfloat lastFrame = 0.0f; // 上一帧时间
+bool keyPressedStatus[1024]; 
+GLfloat deltaTime = 0.0f; 
+GLfloat lastFrame = 0.0f; 
 Camera camera(glm::vec3(0.0f, 0.0f, 4.0f));
 
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
+GLint toonShader;
 GLint shaderProgram;
 GLint skyboxShader;
 GLint reflectShader;
@@ -32,7 +30,6 @@ Plane pl[6];
 GLuint VBO, VAO, VAO2, VBO2;
 OBJObject *RC;
 OBJObject *currObj;
-OBJObject *sphere;
 
 
 
@@ -40,9 +37,6 @@ ROBObject *ball;
 ROBObject *body1,*body2,*body3;
 
 
-//culling sphere
-//Geometry *sphere;
-//bezier curves
 Curve *c0;
 Curve *c1;
 Curve *c2;
@@ -52,13 +46,12 @@ Curve *c5;
 Curve *c6;
 Curve *c7;
 
-
-
+Geometry * horse, *wolf, *cow, *sphere;
+Transform * horsemtx, *wolfmtx, *cowmtx, *sphere_mtx, *tempmtx, *temp;
 Transform * modelMtx, * modelballMtx, *modelbody1Mtx, *modelbody2Mtx, *modelbody3Mtx;
 Transform * singleArmy;
 Transform * army;
-Transform * ballmtx;
-Transform * body1mtx, *body2mtx, * body3mtx;
+
 GLfloat size = 1.0f;
 GLint OBJMode = 1;
 GLint ptCount = 0;
@@ -82,7 +75,7 @@ glm::vec3 selectColor= glm::vec3(0.4f, 0.3f, 0.1f);
 Terrain *terrain;
 HeightGenerator *generator;
 GLint vertexCount = 128;
-
+bool Window::SPHERE_SHOW = false;
 bool left_release=true;
 //toggle parameter
 bool nToggle = false;
@@ -124,8 +117,11 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define BALL_PATH "../ball.obj"
 #define BODY_PATH "../body.obj"
 #define HORSE_PATH "../horse.obj"
-
-
+#define COW_PATH "../Irex_obj.obj"
+#define WOLF_PATH "../wolf.obj"
+#define TOON_VERT "../toonShader.vert"
+#define TOON_FRAG "../toonShader.frag"
+int army_length = 1;
 int Window::width;
 int Window::height;
 std::vector<GLfloat> Window::distanceVec;
@@ -133,21 +129,50 @@ glm::mat4 Window::P;
 glm::mat4 Window::V;
 bool Window::toggleSphere;
 
-
-ROBObject *horse;
 void Window::initialize_objects()
 {
 	
 	
-	
-	//robotNum = 0;
+	sphere = new Geometry(BALL_PATH);
+	horse = new Geometry(HORSE_PATH);
+	wolf = new Geometry(WOLF_PATH);
+	cow = new Geometry(COW_PATH);
+	horsemtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -8.0f, 0.0f)));
+	horsemtx->rotate(90);
+	horsemtx->addChild(horse);
 
-	//culling sphere
-	//sphere = new Geometry("../eyeball_s.obj");
-	//sphere->isSphere = true;
-	horse = new ROBObject(HORSE_PATH);
-	ball = new ROBObject(BALL_PATH);
-	body1 = new ROBObject(BODY_PATH);
+	wolfmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(8.0f, -8.0f, -6.0f)));
+	wolfmtx->rotate(90);
+	wolfmtx->addChild(wolf);
+
+	cowmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(-4.0f, -8.0f, -9.0f)));
+	cowmtx->rotate(90);
+	cowmtx->addChild(cow);
+	sphere_mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
+	sphere_mtx->addChild(sphere);
+
+	modelMtx = new Transform(glm::mat4(1.0f));
+	modelMtx->addChild(horsemtx);
+	modelMtx->addChild(wolfmtx);
+	modelMtx->addChild(cowmtx);
+	//modelMtx->addChild(sphere_mtx);
+
+	temp = new Transform(glm::mat4(1.0f));
+	temp->addChild(horsemtx);
+	temp->addChild(wolfmtx);
+	temp->addChild(cowmtx);
+
+	army = new Transform(glm::mat4(1.0f));
+	float space = 80.0f; // draws 100 robots
+	for (int x = 0; x < army_length; x++) {
+		for (int z = 0; z < army_length; z++) {
+
+			tempmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3((float)x*space, 0.0f, (float)z*space)));
+
+			tempmtx->children = modelMtx->children;
+			army->addChild(tempmtx);
+		}
+	}
 	/*
 	ballmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	ballmtx->addChild(ball);
@@ -183,7 +208,7 @@ void Window::initialize_objects()
 	curveShader = LoadShaders(CURVE_VERT, CURVE_FRAG);
     sphereShader = LoadShaders(SPHERE_VERT,SPHERE_FRAG);
 	terrainShader = LoadShaders(TERRAIN_VERT, TERRAIN_FRAG);
-   
+	toonShader = LoadShaders(TOON_VERT, TOON_FRAG);
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -197,7 +222,7 @@ void Window::clean_up()
 	glDeleteProgram(reflectShader);
     glDeleteProgram(sphereShader);
 	glDeleteProgram(terrainShader);
-
+	glDeleteProgram(toonShader);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -292,7 +317,9 @@ void Window::display_callback(GLFWwindow* window)
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
-	horse->draw(shaderProgram);
+	//horse->draw(shaderProgram);
+	//glUseProgram(toonShader);
+	army->draw(shaderProgram, glm::mat4(1.0f));
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -398,6 +425,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		{
 			camera.handleKeyPress(RIGHT, deltaTime);
 		}
+		V = camera.getViewMatrix();
 	}
 
 }
@@ -408,7 +436,7 @@ void Window::scroll_callback(GLFWwindow* window, double x, double y) {
 	
 
 	camera.handleMouseScroll(y);
-	
+	V = camera.getViewMatrix();
 }
 
 glm::vec3 Window::trackBallMapping(glm::vec2 point)
@@ -452,7 +480,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 	}
 }
 void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
-	if (firstMouseMove) // 首次鼠标移动
+	if (firstMouseMove)
 	{
 		lastX = xpos;
 		lastY = ypos;
@@ -466,4 +494,5 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 	lastY = ypos;
 
 	camera.handleMouseMove(xoffset, yoffset);
+	V = camera.getViewMatrix();
 }
