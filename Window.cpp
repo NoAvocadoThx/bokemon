@@ -131,7 +131,7 @@ bool Window::toggleSphere;
 
 void Window::initialize_objects()
 {
-	
+	glEnable(GL_CLIP_DISTANCE0);
 	body1 = new ROBObject(HORSE_PATH);
 	sphere = new Geometry(BALL_PATH);
 	horse = new Geometry(HORSE_PATH);
@@ -198,7 +198,7 @@ void Window::initialize_objects()
 	cube = new Cube();
 
 	terrain = new Terrain(generator);
-	terrain->translate(glm::vec3(-terrain->vertexCount , -10, -terrain->vertexCount));
+	terrain->translate(glm::vec3(-terrain->vertexCount-50 , -10, -terrain->vertexCount-100));
 	terrain->scaleSize(2.0f,1.0f,2.0f);
 
 	// Load the shader program. Make sure you have the correct filepath up top

@@ -6,6 +6,7 @@ layout (location = 1) in vec3 normal;
 uniform mat4 projection;
 uniform mat4 modelview;
 uniform mat4 model;
+uniform vec4 clippingPlane;
 
 out vec3 world_pos;
 out vec3 world_normal;
@@ -15,4 +16,6 @@ void main()
 	world_pos = mat3(model) * position;//careful here
 	world_normal = normalize(mat3(model) * normal);
 	gl_Position = projection*modelview*vec4(position,1);
+	vec4 worldPos = mat4(1.0f)*vec4(position,1.0f);
+	gl_ClipDistance[0]=dot(worldPos,clippingPlane);
 }

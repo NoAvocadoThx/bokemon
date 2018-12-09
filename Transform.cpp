@@ -12,7 +12,7 @@ Transform::Transform(glm::mat4 transMat) { // transformation mat
     //    origin = glm::vec3(M[0][3], M[1][3], M[2][3]);
     origin = glm::vec3(M[0][0], M[1][1], M[2][2]);
 
-       cout << "origin is initialized as: " << origin.x << ", " << origin.y << ", " << origin.z << endl;
+      // cout << "origin is initialized as: " << origin.x << ", " << origin.y << ", " << origin.z << endl;
     //radius = 55.0f; // radius of bounding sphere
     //    midY = (M[3][1] - M[0][1])/2;
 }
@@ -48,30 +48,14 @@ void Transform::draw(GLuint shaderProgram, glm::mat4 C) {
 
 void Transform::update() {
     for (list<Node*>::iterator it = children.begin(); it != children.end(); ++it) {
-        Node* child = *it; //
+        Node* child = *it; 
         child->update();
     }
-    if (counter < 150) {
-        if (L_LEG | R_ARM) walk(0.04f);
-        if (R_LEG | L_ARM) walk(-0.04f);
-        
-        if (L_ANTENNA) rotatey(1) ;
-        if (R_ANTENNA) rotatey(-1);
-        counter++;
-    } else {
-        if (L_LEG | R_ARM) walk(-0.04f);
-        if (R_LEG | L_ARM) walk(0.04f);
-        
-        if (L_ANTENNA) rotatey(-1) ;
-        if (R_ANTENNA) rotatey(1);
-        counter++;
-    }
-    if (counter == 300) counter = 0;
+
 }
 
 void Transform::walk(float deg) {
-    //    M = M * glm::rotate(glm::mat4(1.0f), deg / 180.0f * glm::pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f));
-    //    M = M * glm::rotate(glm::mat4(1.0f), sin(deg), glm::vec3(1.0f, 0.0f, 0.0f));
+
     M = glm::rotate(glm::mat4(1.0f), sin(deg), glm::vec3(1.0f, 0.0f, 0.0f)) * M;
 }
 void Transform::rotate(float deg) {
@@ -176,7 +160,7 @@ int Transform::in_six_planes(glm::vec3 origin) {
         }
     }
     count = count/3;
-std::cout<<"count"<<count<<std::endl;
+//std::cout<<"count"<<count<<std::endl;
     return count;
 }
 
@@ -209,9 +193,9 @@ bool Transform::check_origin_NDC(glm::vec3 origin, glm::vec3 normal) {
     glm::vec4 origin_NDC = Window::P * Window::V * M * glm::vec4(origin, 1.0f);
     origin_NDC = origin_NDC/origin_NDC.w;
     
-    cout << "origin is: " << origin.x << ", " << origin.y << ", " << origin.x << endl;
-    cout << "origin in NDC is: " << origin_NDC.x << ", " << origin_NDC.y << ", " << origin_NDC.z << endl;
-    cout << "normal is: " << normal.x << ", " << normal.y << ", " << normal.z << endl;
+  //  cout << "origin is: " << origin.x << ", " << origin.y << ", " << origin.x << endl;
+  //  cout << "origin in NDC is: " << origin_NDC.x << ", " << origin_NDC.y << ", " << origin_NDC.z << endl;
+ //   cout << "normal is: " << normal.x << ", " << normal.y << ", " << normal.z << endl;
     
     //    cout << origin_NDC.x << ", " << origin_NDC.y << ", " << origin_NDC.z << endl;
     

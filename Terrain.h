@@ -54,7 +54,7 @@ public:
 	void draw(GLuint);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
 	void loadTexture(unsigned char* tdata);
-	GLuint loadTexture2();
+	void loadTexture2();
 	void Terrain::translate(glm::vec3 transVec);
 	glm::vec3 calculateNormal(int x, int z, HeightGenerator*);
 	float getHeight(int x, int z, HeightGenerator*);

@@ -13,6 +13,7 @@ layout (location = 2) in vec2 TexCoord;
 
 uniform mat4 projection;
 uniform mat4 modelview;
+uniform vec4 clippingPlane;
 
 
 out vec2 TexCoords;
@@ -22,7 +23,10 @@ out vec3 fragposition;
 void main()
 {
     gl_Position = projection * modelview * vec4(position, 1.0);
+	gl_ClipDistance[0]=0;
     TexCoords = TexCoord;
     fragNormal = normal;
     fragposition = position;
+	vec4 worldPos = mat4(1.0f)*vec4(position,1.0f);
+	gl_ClipDistance[0]=dot(worldPos,clippingPlane);
 }

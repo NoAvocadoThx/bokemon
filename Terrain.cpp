@@ -249,7 +249,7 @@ void Terrain::loadTexture(unsigned char* tdata)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 }
-GLuint Terrain::loadTexture2() {
+void Terrain::loadTexture2() {
 	std::string str("../terrain1.ppm");
 	if (str.c_str() == NULL) {
 		std::cout << "null" << std::endl;

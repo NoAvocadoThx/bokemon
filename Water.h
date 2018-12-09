@@ -22,8 +22,24 @@ private:
 
 public:
 
+	GLuint VBO, VAO, EBO,reflectionFrameBuffer,refractionFrameBuffer;
+	//depth buffer
+	GLuint reflectionDB, refractionDP;
+	GLuint reflectionTexture, refractionTexture;
+	GLuint uProjection, uModelview;
+	glm::vec3 position;
+	glm::vec3 toWorld;
+	GLuint dudvMap;
+	GLuint texture[1];
 
 
+	Water();
+	~Water();
+	GLuint loadTexture(std::string str);
+	void draw(GLuint);
+	void update();
+
+	
 
 };
 

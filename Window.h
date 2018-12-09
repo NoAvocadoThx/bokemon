@@ -64,6 +64,7 @@ public:
 	static void calculate();
 	static void translateCamera(glm::vec3 transVec);
 	static void resetCamera();
+	static void calculateClipPlane();
 };
 
 #endif

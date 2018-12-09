@@ -16,6 +16,7 @@ out vec3 FragPos;
 out vec2 TexCoords;
 
 uniform mat4 modelview;
+uniform vec4 clippingPlane;
 
 uniform mat4 projection;
 
@@ -26,6 +27,9 @@ void main()
     FragPos = vec3(modelview * vec4(position, 1.0f));
     Normal = mat3(transpose(inverse(modelview))) * normal;  
 	TexCoords =vec2( position.x,position.y);
+	vec4 worldPos = mat4(1.0f)*vec4(position,1.0f);
+	gl_ClipDistance[0]=dot(worldPos,clippingPlane);
+
 	
     
 } 

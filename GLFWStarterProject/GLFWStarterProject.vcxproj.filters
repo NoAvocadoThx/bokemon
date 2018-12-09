@@ -107,6 +107,9 @@
     <ClCompile Include="..\HeightGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Water.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shader.frag">
@@ -150,6 +153,18 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="..\terrainShader.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\toonShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\toonShader.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\waterShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\waterShader.vert">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
