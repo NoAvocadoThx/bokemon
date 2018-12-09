@@ -63,6 +63,9 @@
     <ClInclude Include="..\Group.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Water.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">

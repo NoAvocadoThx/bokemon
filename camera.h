@@ -29,7 +29,7 @@ public:
 	Camera(glm::vec3 pos = glm::vec3(0.0, 0.0, 2.0),
 		glm::vec3 up = glm::vec3(0.0, 1.0, 0.0),
 		GLfloat yaw = YAW, GLfloat pitch = PITCH)
-		:position(pos), forward(0.0, 0.0, -1.0), viewUp(up),
+		:position(pos), forward(0.0, 0.0, 100.0f), viewUp(up),
 		moveSpeed(SPEED), mouse_zoom(MOUSE_ZOOM), mouse_sensitivity(MOUSE_SENSITIVTY),
 		yawAngle(yaw), pitchAngle(pitch)
 	{
@@ -67,7 +67,7 @@ public:
 	void handleMouseMove(GLfloat xoffset, GLfloat yoffset)
 	{
 
-		xoffset *= this->mouse_sensitivity; // 用鼠标灵敏度调节角度变换
+		xoffset *=- this->mouse_sensitivity; // 用鼠标灵敏度调节角度变换
 		yoffset *= this->mouse_sensitivity;
 
 		this->pitchAngle += yoffset;
@@ -100,9 +100,9 @@ public:
 	void updateCameraVectors()
 	{
 		glm::vec3 forward;
-		forward.x = -sin(glm::radians(this->yawAngle)) * cos(glm::radians(this->pitchAngle));
-		forward.y = sin(glm::radians(this->pitchAngle));
-		forward.z = -cos(glm::radians(this->yawAngle)) * cos(glm::radians(this->pitchAngle));
+		forward.x = -sin(glm::radians(this->yawAngle)) * cos(glm::radians(this->pitchAngle)+100);
+		forward.y = sin(glm::radians(this->pitchAngle)+100);
+		forward.z = -cos(glm::radians(this->yawAngle)) * cos(glm::radians(this->pitchAngle)+100);
 		this->forward = glm::normalize(forward);
 
 		glm::vec3 side;

@@ -39,6 +39,7 @@
     <ClInclude Include="..\stb_image.h" />
     <ClInclude Include="..\Terrain.h" />
     <ClInclude Include="..\Transform.h" />
+    <ClInclude Include="..\Water.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
