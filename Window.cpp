@@ -334,17 +334,29 @@ void Window::display_callback(GLFWwindow* window)
 	glUseProgram(skyboxShader);
 	//glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);
-
+	
 	glUseProgram(terrainShader);
 	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
+
+	//->draw(shaderProgram);
+	//glUseProgram(toonShader);
+	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
+	body1->draw(shaderProgram);
+	
+	//glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+
 	//army->draw(shaderProgram, glm::mat4(1.0f));
+
 	//modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
 	//ball->draw(shaderProgram);
 	
 	
+	modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
+
+
 	glUseProgram(toonShader);
 	//body1->draw(shaderProgram);
 	
