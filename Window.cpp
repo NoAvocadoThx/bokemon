@@ -36,9 +36,9 @@ GLuint terrainCP;
 
 
 
-ROBObject *ball;
-ROBObject *body1,*body2,*body3;
 
+ROBObject *body1,*body2,*body3, *ball2;
+//BALLObject *ball;
 
 Curve *c0;
 Curve *c1;
@@ -50,8 +50,8 @@ Curve *c6;
 Curve *c7;
 
 Geometry * horse, *wolf, *cow, *sphere;
-Transform * horsemtx, *wolfmtx, *cowmtx, *sphere_mtx, *tempmtx, *temp;
-Transform * modelMtx, * modelballMtx, *modelbody1Mtx, *modelbody2Mtx, *modelbody3Mtx;
+Transform * horsemtx, *wolfmtx, *cowmtx, *sphere_mtx, *tempmtx, *temp, *model_sphere;
+Transform * modelMtx, *modelballMtx, *modelbody1Mtx, *modelbody2Mtx, *modelbody3Mtx;
 Transform * singleArmy;
 Transform * army;
 
@@ -124,6 +124,7 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define WOLF_PATH "../wolf.obj"
 #define TOON_VERT "../toonShader.vert"
 #define TOON_FRAG "../toonShader.frag"
+#define SOUND_PATH "../water.mp3"
 int army_length = 1;
 int Window::width;
 int Window::height;
@@ -132,38 +133,69 @@ glm::mat4 Window::P;
 glm::mat4 Window::V;
 bool Window::toggleSphere;
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+
+// Sound System
+irrklang::ISoundEngine * SoundEngine;
+
 void Window::initialize_objects()
 {
+	int seed = rand();
+	generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
+	cube = new Cube();
+	cube->scaleSize(1.0f);
+	terrain = new Terrain(generator);
+	terrain->translate(glm::vec3(-terrain->vertexCount - 50, -10, -terrain->vertexCount - 100));
+	terrain->scaleSize(2.0f, 1.0f, 2.0f);
 
-	body1 = new ROBObject(HORSE_PATH);
+
+	//body1 = new ROBObject(HORSE_PATH);
 	sphere = new Geometry(BALL_PATH);
 	horse = new Geometry(HORSE_PATH);
 	wolf = new Geometry(WOLF_PATH);
 	cow = new Geometry(COW_PATH);
-	horsemtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -8.0f, 0.0f)));
+
+	glm::vec3 horsepos = { 0.0f, 0.0f, 0.0f };
+	horsemtx = new Transform(glm::translate(glm::mat4(1.0f), horsepos));
 	horsemtx->rotate(90);
 	horsemtx->addChild(horse);
+	
+	float heighth = terrain->getHeight(horsepos.x, horsepos.z, generator);
+	horsemtx->translateY(heighth);
 
-	wolfmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(8.0f, -8.0f, -6.0f)));
+
+	glm::vec3 wolfpos = { 4.0f, 0.0f, -5.0f };
+	wolfmtx = new Transform(glm::translate(glm::mat4(1.0f),wolfpos));
 	wolfmtx->rotate(90);
 	wolfmtx->addChild(wolf);
+	float heightw = terrain->getHeight(wolfpos.x, wolfpos.z, generator);
+	wolfmtx->translateY(heightw);
 
-	cowmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(-4.0f, -8.0f, -9.0f)));
+
+	glm::vec3 cowpos = { -4.0f, -8.0f, -9.0f };
+	cowmtx = new Transform(glm::translate(glm::mat4(1.0f), cowpos));
 	cowmtx->rotate(90);
 	cowmtx->addChild(cow);
-	sphere_mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
+	float heightc = terrain->getHeight(cowpos.x, cowpos.z, generator);
+	cowmtx->translateY(heightc);
+
+	glm::vec3 spherepos = { 0.0f, 0.0f, 0.0f };
+	sphere_mtx = new Transform(glm::translate(glm::mat4(1.0f), spherepos));
+	sphere_mtx->scalesize(0.5);
 	sphere_mtx->addChild(sphere);
+	sphere_mtx->SPHERE = true;
+	float heights = terrain->getHeight(spherepos.x, spherepos.z, generator);
+	sphere_mtx->translateY(heights);
+
 
 	modelMtx = new Transform(glm::mat4(1.0f));
 	modelMtx->addChild(horsemtx);
 	modelMtx->addChild(wolfmtx);
 	modelMtx->addChild(cowmtx);
-	//modelMtx->addChild(sphere_mtx);
+	
 
-	temp = new Transform(glm::mat4(1.0f));
-	temp->addChild(horsemtx);
-	temp->addChild(wolfmtx);
-	temp->addChild(cowmtx);
+	modelballMtx = new Transform(glm::mat4(1.0f));
+	modelballMtx->addChild(sphere_mtx);
+
 
 	army = new Transform(glm::mat4(1.0f));
 	float space = 80.0f; // draws 100 robots
@@ -178,16 +210,8 @@ void Window::initialize_objects()
 	}
 
 	
-	int seed = rand();
-	generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
+	
 
-
-
-	cube = new Cube();
-	cube->scaleSize(1.0f);
-	terrain = new Terrain(generator);
-	terrain->translate(glm::vec3(-terrain->vertexCount-50 , -10, -terrain->vertexCount-100));
-	terrain->scaleSize(2.0f,1.0f,2.0f);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -200,6 +224,11 @@ void Window::initialize_objects()
 	boxCP = glGetUniformLocation(skyboxShader, "clippingPlane");
 	objCP = glGetUniformLocation(toonShader, "clippingPlane");
 	terrainCP = glGetUniformLocation(terrainShader, "clippingPlane");
+
+
+
+	SoundEngine = irrklang::createIrrKlangDevice();
+
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -214,6 +243,7 @@ void Window::clean_up()
     glDeleteProgram(sphereShader);
 	glDeleteProgram(terrainShader);
 	glDeleteProgram(toonShader);
+	delete(SoundEngine);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -310,13 +340,25 @@ void Window::display_callback(GLFWwindow* window)
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
+
 	//->draw(shaderProgram);
 	//glUseProgram(toonShader);
 	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
 	body1->draw(shaderProgram);
 	
-	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	//glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
 
+	//army->draw(shaderProgram, glm::mat4(1.0f));
+	modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
+
+
+
+	glUseProgram(toonShader);
+	//body1->draw(shaderProgram);
+	//ball->draw(shaderProgram);
+	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
+	army->draw(toonShader, glm::mat4(1.0f));
 	
 	//glUniform3fv(glGetUniformLocation(toonShader, "eye_position"), 1, &(pos[0]));
 
@@ -347,19 +389,15 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 	
 
-		
+		if (key == GLFW_KEY_1) 
+		{
+			SoundEngine->play2D(SOUND_PATH, GL_TRUE);
+		}
 		
 		//spot light rotation switch
 		if (key == GLFW_KEY_2) {
 
-			if (currObj->sptRot) {
-				currObj->sptRot= false;
-
-			}
-			else {
-				currObj->sptRot = true;
-
-			}
+			SoundEngine->stopAllSounds();
 		}
 
 
@@ -409,22 +447,45 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		//Camera movement controls (FPS style)
 		if (key == GLFW_KEY_W)	//Forward
 		{
+			//modelballMtx->translateZ(-0.2f);
 			camera.handleKeyPress(FORWARD, deltaTime);
 		}
 		else if (key == GLFW_KEY_S) //Back
 		{
-
+			//modelballMtx->translateZ(0.2f);
 			camera.handleKeyPress(BACKWARD, deltaTime);
 
 		}
 		//cout << "z" << endl;
 		else if (key == GLFW_KEY_A) //Left
 		{
+			//modelballMtx->translateX(-0.2f);
 			camera.handleKeyPress(LEFT, deltaTime);
 		}
 		else if (key == GLFW_KEY_D) //Right
 		{
+			//modelballMtx->translateX(0.2f);
 			camera.handleKeyPress(RIGHT, deltaTime);
+		}
+		else if (key == GLFW_KEY_UP)
+		{
+			//ball->move(deltaTime);
+			modelballMtx->translateZ(-0.1f);
+		}
+		else if (key == GLFW_KEY_DOWN)
+		{
+			//ball->move(-deltaTime);
+			modelballMtx->translateZ(0.1f);
+		}
+		else if (key == GLFW_KEY_RIGHT)
+		{
+			//ball->spin(deltaTime);
+			modelballMtx->translateX(0.1f);
+		}
+		else if (key == GLFW_KEY_LEFT)
+		{
+			//ball->spin(-deltaTime);
+			modelballMtx->translateX(-0.1f);
 		}
 		V = camera.getViewMatrix();
 	}

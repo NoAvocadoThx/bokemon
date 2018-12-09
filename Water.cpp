@@ -72,7 +72,7 @@ void Water::draw(GLuint shaderProgram) {
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &toWorld[0][0]);
-	glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), Camera::position.x, Camera::position.y, Camera::position.z);
+	//glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), Camera::position.x, Camera::position.y, Camera::position.z);
 	glBindVertexArray(VAO);
 	curTime = glfwGetTime();
 }

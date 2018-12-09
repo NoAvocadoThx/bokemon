@@ -24,6 +24,9 @@
 #include "Curve.h"
 #include <cmath>
 #include "camera.h"
+#include "irrKlang.h"
+#include <iostream>
+using namespace irrklang;
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>                  // ...so now that's defined we can import GLM itself.
 #include <glm/gtc/matrix_transform.hpp>
