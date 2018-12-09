@@ -18,7 +18,7 @@ enum Camera_Movement {
 // 定义预设常量
 const GLfloat YAW = 0.0f;
 const GLfloat PITCH = 0.0f;
-const GLfloat SPEED = 3.0f;
+const GLfloat SPEED = 100.0f;
 const GLfloat MOUSE_SENSITIVTY = 0.05f;
 const GLfloat MOUSE_ZOOM = 45.0f;
 const float  MAX_PITCH_ANGLE = 89.0f; // 防止万向锁

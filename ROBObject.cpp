@@ -143,39 +143,8 @@ void ROBObject::draw(GLuint shaderProgram)
 {
     
     glm::mat4 modelview = Window::V * toWorld;
-    if (object_mode != 3) {
-        if (scaleMode) {
-            
-            this->toWorld = toWorld * glm::scale(glm::mat4(1.0f), glm::vec3(scale_size, scale_size, scale_size));
-            scale_size = 1;
-            
-        }
-        
-        if (rotateMode) {
-            
-            this->toWorld = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * this->toWorld;
-            rotAngle = 0;
-            
-        }
-    }
-    else {
-        
-        if (scaleMode) {
-            this->lightM =lightM * glm::scale(glm::mat4(1.0f), glm::vec3(scale_size, scale_size, scale_size));
-            scale_size =1 ;
-            
-        }
-        this->lightM = lightM * glm::translate(glm::mat4(1.0f), glm::vec3(250, 250, 0));
-        
-        if (rotateMode) {
-            
-            this->lightM = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * this->lightM;
-            rotAngle = 0;
-            
-        }
-        this->lightM = lightM * glm::translate(glm::mat4(1.0f), glm::vec3(-250, -250, 0));
-        
-    }
+
+    
     
     uProjection = glGetUniformLocation(shaderProgram, "projection");
     uModelview = glGetUniformLocation(shaderProgram, "modelview");
@@ -388,8 +357,14 @@ void  ROBObject::loadTexture()
 
 void ROBObject::draw(GLuint shaderProgram, glm::mat4 C)
 {
-    //    cout << "drawing obj" << endl;
-    
+	glm::vec3 lightColor = { 0.0f, 0.0f, 1.0f };
+	glm::vec3 lightDir = { 50, 0, 50 };
+	glm::vec3 color_diff = glm::vec3(0.780392, 0.568627, 0.113725);
+	glm::vec3 color_spec = glm::vec3(0.992157, 0.941176, 0.807843);
+	glm::vec3 color_ambi = glm::vec3(0.329412, 0.223529, 0.027451);
+	float shininess = 100.0f;
+	int material_kd = 0.5;
+	int material_ks = 0.3;
     // Calculate the combination of the model and view (camera inverse) matrices
     glm::mat4 modelview = Window::V * C; // before it was C
     
@@ -397,7 +372,12 @@ void ROBObject::draw(GLuint shaderProgram, glm::mat4 C)
     
     uProjection = glGetUniformLocation(shaderProgram, "projection");
     uModelview = glGetUniformLocation(shaderProgram, "modelview");
-    
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &C[0][0]);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "light_position"), 1, &(lightDir[0]));
+
+	glUniform1i(glGetUniformLocation(shaderProgram, "material_shininess"), shininess);
+	glUniform1f(glGetUniformLocation(shaderProgram, "material_kd"), material_kd);
+	glUniform1f(glGetUniformLocation(shaderProgram, "material_ks"), material_ks);
     // Now send these values to the shader program
     glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
     glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);

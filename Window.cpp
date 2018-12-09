@@ -132,7 +132,7 @@ bool Window::toggleSphere;
 void Window::initialize_objects()
 {
 	
-	
+	body1 = new ROBObject(HORSE_PATH);
 	sphere = new Geometry(BALL_PATH);
 	horse = new Geometry(HORSE_PATH);
 	wolf = new Geometry(WOLF_PATH);
@@ -317,9 +317,13 @@ void Window::display_callback(GLFWwindow* window)
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
-	//horse->draw(shaderProgram);
+	//->draw(shaderProgram);
 	//glUseProgram(toonShader);
-	army->draw(shaderProgram, glm::mat4(1.0f));
+	body1->draw(shaderProgram);
+	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	//glUniform3fv(glGetUniformLocation(toonShader, "eye_position"), 1, &(pos[0]));
+
+	//army->draw(toonShader, glm::mat4(1.0f));
 	//distanceVec.clear();
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();

@@ -1,20 +1,18 @@
-uniform vec3 lightDir;
-varying vec3 normal;
+#version 330 core
+
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 normal;
+
+uniform mat4 projection;
+uniform mat4 modelview;
+uniform mat4 model;
+
+out vec3 world_pos;
+out vec3 world_normal;
 
 void main()
 {
-	float intensity;
-	vec4 color;
-	intensity = dot(lightDir,normal);
-
-	if (intensity > 0.95)
-		color = vec4(1.0,0.5,0.5,1.0);
-	else if (intensity > 0.5)
-		color = vec4(0.6,0.3,0.3,1.0);
-	else if (intensity > 0.25)
-		color = vec4(0.4,0.2,0.2,1.0);
-	else
-		color = vec4(0.2,0.1,0.1,1.0);
-	gl_FragColor = color;
-
+	world_pos = mat3(model) * position;//careful here
+	world_normal = normalize(mat3(model) * normal);
+	gl_Position = projection*modelview*vec4(position,1);
 }
