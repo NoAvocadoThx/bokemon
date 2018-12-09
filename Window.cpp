@@ -6,7 +6,7 @@ bool firstMouseMove = true;
 bool keyPressedStatus[1024]; 
 GLfloat deltaTime = 0.0f; 
 GLfloat lastFrame = 0.0f; 
-Camera camera(glm::vec3(0.0f, 0.0f, 4.0f));
+
 
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
@@ -128,7 +128,7 @@ std::vector<GLfloat> Window::distanceVec;
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 bool Window::toggleSphere;
-
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 void Window::initialize_objects()
 {
 	
@@ -173,22 +173,7 @@ void Window::initialize_objects()
 			army->addChild(tempmtx);
 		}
 	}
-	/*
-	ballmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	ballmtx->addChild(ball);
 
-	body1 = new Geometry(BODY_PATH);
-	body1mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	body1mtx->addChild(body1);
-
-	body2 = new Geometry(BODY_PATH);
-	body2mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	body2mtx->addChild(body2);
-
-	body3 = new Geometry(BODY_PATH);
-	body3mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	body3mtx->addChild(body3); 
-*/
 	
 	int seed = rand();
 	generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
@@ -286,7 +271,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 	{
 		//P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 		P = glm::perspective(camera.mouse_zoom,
-			(GLfloat)(Window::width) / Window::height, 1.0f, 100.0f);
+			(GLfloat)(Window::width) / Window::height, 1.0f, 1000.0f);
 		V = camera.getViewMatrix();
 	}
 }
@@ -307,8 +292,7 @@ void Window::display_callback(GLFWwindow* window)
 	glm::vec3 rOrigin;
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//calculateFrustum();
-	// Use the shader of programID
+
 	glUseProgram(skyboxShader);
 
 	cube->draw(skyboxShader);
