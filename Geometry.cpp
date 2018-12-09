@@ -38,7 +38,7 @@ Geometry::~Geometry() {}
 
 void Geometry::draw(GLuint shaderProgram, glm::mat4 C) {
 	C = C * scaleMat;
-	std::cout << IS_SPHERE << std::endl;
+	//std::cout << IS_SPHERE << std::endl;
 	if (IS_SPHERE && Window::SPHERE_SHOW) {
 		//float midY = (obj->toWorld[3][1] - obj->toWorld[0][1]);
 		obj->drawLines(shaderProgram, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f))

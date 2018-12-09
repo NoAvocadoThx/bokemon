@@ -36,9 +36,9 @@ GLuint terrainCP;
 
 
 
-ROBObject *ball;
-ROBObject *body1,*body2,*body3;
 
+ROBObject *body1,*body2,*body3, *ball2;
+//BALLObject *ball;
 
 Curve *c0;
 Curve *c1;
@@ -50,8 +50,8 @@ Curve *c6;
 Curve *c7;
 
 Geometry * horse, *wolf, *cow, *sphere;
-Transform * horsemtx, *wolfmtx, *cowmtx, *sphere_mtx, *tempmtx, *temp;
-Transform * modelMtx, * modelballMtx, *modelbody1Mtx, *modelbody2Mtx, *modelbody3Mtx;
+Transform * horsemtx, *wolfmtx, *cowmtx, *sphere_mtx, *tempmtx, *temp, *model_sphere;
+Transform * modelMtx, *modelballMtx, *modelbody1Mtx, *modelbody2Mtx, *modelbody3Mtx;
 Transform * singleArmy;
 Transform * army;
 
@@ -131,11 +131,19 @@ std::vector<GLfloat> Window::distanceVec;
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 bool Window::toggleSphere;
-Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, -3.0f, 0.0f));
 void Window::initialize_objects()
 {
+	int seed = rand();
+	generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
+	cube = new Cube();
+	cube->scaleSize(1.0f);
+	terrain = new Terrain(generator);
+	terrain->translate(glm::vec3(-terrain->vertexCount - 50, -10, -terrain->vertexCount - 100));
+	terrain->scaleSize(2.0f, 1.0f, 2.0f);
 
-	body1 = new ROBObject(HORSE_PATH);
+
+	//body1 = new ROBObject(HORSE_PATH);
 	sphere = new Geometry(BALL_PATH);
 	horse = new Geometry(HORSE_PATH);
 	wolf = new Geometry(WOLF_PATH);
@@ -151,19 +159,21 @@ void Window::initialize_objects()
 	cowmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(-4.0f, -8.0f, -9.0f)));
 	cowmtx->rotate(90);
 	cowmtx->addChild(cow);
-	sphere_mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
+
+	sphere_mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -6.0f, 0.0f)));
+	sphere_mtx->scalesize(0.1);
 	sphere_mtx->addChild(sphere);
+	sphere_mtx->SPHERE = true;
 
 	modelMtx = new Transform(glm::mat4(1.0f));
 	modelMtx->addChild(horsemtx);
 	modelMtx->addChild(wolfmtx);
 	modelMtx->addChild(cowmtx);
-	//modelMtx->addChild(sphere_mtx);
+	
 
-	temp = new Transform(glm::mat4(1.0f));
-	temp->addChild(horsemtx);
-	temp->addChild(wolfmtx);
-	temp->addChild(cowmtx);
+	modelballMtx = new Transform(glm::mat4(1.0f));
+	modelballMtx->addChild(sphere_mtx);
+
 
 	army = new Transform(glm::mat4(1.0f));
 	float space = 80.0f; // draws 100 robots
@@ -178,16 +188,8 @@ void Window::initialize_objects()
 	}
 
 	
-	int seed = rand();
-	generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
+	
 
-
-
-	cube = new Cube();
-	cube->scaleSize(1.0f);
-	terrain = new Terrain(generator);
-	terrain->translate(glm::vec3(-terrain->vertexCount-50 , -10, -terrain->vertexCount-100));
-	terrain->scaleSize(2.0f,1.0f,2.0f);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -310,12 +312,16 @@ void Window::display_callback(GLFWwindow* window)
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
-	//->draw(shaderProgram);
-	//glUseProgram(toonShader);
-	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
-	body1->draw(shaderProgram);
-	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	//army->draw(shaderProgram, glm::mat4(1.0f));
+	modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
 
+
+	glUseProgram(toonShader);
+	//body1->draw(shaderProgram);
+	//ball->draw(shaderProgram);
+	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
+	army->draw(toonShader, glm::mat4(1.0f));
 	
 	//glUniform3fv(glGetUniformLocation(toonShader, "eye_position"), 1, &(pos[0]));
 
@@ -424,6 +430,26 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		else if (key == GLFW_KEY_D) //Right
 		{
 			camera.handleKeyPress(RIGHT, deltaTime);
+		}
+		else if (key == GLFW_KEY_UP)
+		{
+			//ball->move(deltaTime);
+			modelballMtx->translateZ(-0.1f);
+		}
+		else if (key == GLFW_KEY_DOWN)
+		{
+			//ball->move(-deltaTime);
+			modelballMtx->translateZ(0.1f);
+		}
+		else if (key == GLFW_KEY_RIGHT)
+		{
+			//ball->spin(deltaTime);
+			modelballMtx->translateX(0.1f);
+		}
+		else if (key == GLFW_KEY_LEFT)
+		{
+			//ball->spin(-deltaTime);
+			modelballMtx->translateX(-0.1f);
 		}
 		V = camera.getViewMatrix();
 	}
