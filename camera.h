@@ -8,20 +8,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <iomanip>      // std::setprecision
-// 定义移动方向
+
 enum Camera_Movement {
 	FORWARD,
 	BACKWARD,
 	LEFT,
 	RIGHT
 };
-// 定义预设常量
+
 const GLfloat YAW = 0.0f;
 const GLfloat PITCH = 0.0f;
 const GLfloat SPEED = 100.0f;
 const GLfloat MOUSE_SENSITIVTY = 0.05f;
 const GLfloat MOUSE_ZOOM = 45.0f;
-const float  MAX_PITCH_ANGLE = 89.0f; // 防止万向锁
+const float  MAX_PITCH_ANGLE = 89.0f; 
 
 class Camera
 {
@@ -36,12 +36,12 @@ public:
 		this->updateCameraVectors();
 	}
 public:
-	// 获取视变换矩阵
+
 	glm::mat4 getViewMatrix()
 	{
 		return glm::lookAt(this->position, this->position + this->forward, this->viewUp);
 	}
-	// 处理键盘按键后方向移动
+
 	void handleKeyPress(Camera_Movement direction, GLfloat deltaTime)
 	{
 		GLfloat velocity = this->moveSpeed * deltaTime;
@@ -63,11 +63,11 @@ public:
 			break;
 		}
 	}
-	// 处理鼠标移动
+
 	void handleMouseMove(GLfloat xoffset, GLfloat yoffset)
 	{
 
-		xoffset *=- this->mouse_sensitivity; // 用鼠标灵敏度调节角度变换
+		xoffset *=- this->mouse_sensitivity; 
 		yoffset *= this->mouse_sensitivity;
 
 		this->pitchAngle += yoffset;
@@ -76,7 +76,7 @@ public:
 		this->normalizeAngle();
 		this->updateCameraVectors();
 	}
-	// 处理鼠标滚轮缩放 保持在[1.0, MOUSE_ZOOM]之间
+
 	void handleMouseScroll(GLfloat yoffset)
 	{
 		if (this->mouse_zoom >= 1.0f && this->mouse_zoom <= MOUSE_ZOOM)
@@ -86,7 +86,7 @@ public:
 		if (this->mouse_zoom >= 45.0f)
 			this->mouse_zoom = 45.0f;
 	}
-	// 使pitch yaw角度保持在合理范围内
+
 	void normalizeAngle()
 	{
 		if (this->pitchAngle > MAX_PITCH_ANGLE)
@@ -96,7 +96,7 @@ public:
 		if (this->yawAngle < 0.0f)
 			this->yawAngle += 360.0f;
 	}
-	// 计算forward side向量
+
 	void updateCameraVectors()
 	{
 		glm::vec3 forward;
@@ -112,9 +112,9 @@ public:
 		this->side = glm::normalize(side);
 	}
 public:
-	glm::vec3 forward, up, side, viewUp, position; // 相机属性
-	GLfloat yawAngle, pitchAngle; // 欧拉角
-	GLfloat moveSpeed, mouse_sensitivity, mouse_zoom; // 相机选项
+	glm::vec3 forward, up, side, viewUp, position;
+	GLfloat yawAngle, pitchAngle;
+	GLfloat moveSpeed, mouse_sensitivity, mouse_zoom; 
 };
 
 #endif

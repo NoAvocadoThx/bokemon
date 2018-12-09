@@ -12,7 +12,11 @@ Transform::Transform(glm::mat4 transMat) { // transformation mat
     //    origin = glm::vec3(M[0][3], M[1][3], M[2][3]);
     origin = glm::vec3(M[0][0], M[1][1], M[2][2]);
 
+
       // cout << "origin is initialized as: " << origin.x << ", " << origin.y << ", " << origin.z << endl;
+
+   //    cout << "origin is initialized as: " << origin.x << ", " << origin.y << ", " << origin.z << endl;
+
     //radius = 55.0f; // radius of bounding sphere
     //    midY = (M[3][1] - M[0][1])/2;
 }
@@ -160,7 +164,9 @@ int Transform::in_six_planes(glm::vec3 origin) {
         }
     }
     count = count/3;
+
 //std::cout<<"count"<<count<<std::endl;
+
     return count;
 }
 
