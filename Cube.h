@@ -38,7 +38,7 @@ public:
 	void spin(float);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
 	unsigned int loadCubemap(std::vector<std::string> faces);
-	
+	void scaleSize(GLfloat scaleV);
 	void loadTexture(unsigned char* tdata);
 
 	// These variables are needed for the shader program
@@ -51,9 +51,9 @@ public:
 // This just looks nicer since it's easy to tell what coordinates/indices belong where.
 const GLfloat vertices[8][3] = {
 	// "Front" vertices
-	{-300.0f, -300.0f,  300.0f}, {300.0f, -300.0f,  300.0f}, {300.0f,  300.0f,  300.0f}, {-300.0f,  300.0f,  300.0f},
+	{-400.0f, -400.0f,  400.0f}, {400.0f, -400.0f,  400.0f}, {400.0f,  400.0f,  400.0f}, {-400.0f,  400.0f,  400.0f},
 	// "Back" vertices
-	{-300.0f, -300.0f, -300.0f}, {300.0f, -300.0f, -300.0f}, {300.0f,  300.0f, -300.0f}, {-300.0f,  300.0f, -300.0f}
+	{-400.0f, -400.0f, -400.0f}, {400.0f, -400.0f, -400.0f}, {400.0f,  400.0f, -400.0f}, {-400.0f,  400.0f, -400.0f}
 };
 
 // Note that GL_QUADS is deprecated in modern OpenGL (and removed from OSX systems).

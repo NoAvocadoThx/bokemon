@@ -134,7 +134,7 @@ bool Window::toggleSphere;
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 void Window::initialize_objects()
 {
-	glEnable(GL_CLIP_DISTANCE0);
+
 	body1 = new ROBObject(HORSE_PATH);
 	sphere = new Geometry(BALL_PATH);
 	horse = new Geometry(HORSE_PATH);
@@ -184,7 +184,7 @@ void Window::initialize_objects()
 
 
 	cube = new Cube();
-
+	cube->scaleSize(1.0f);
 	terrain = new Terrain(generator);
 	terrain->translate(glm::vec3(-terrain->vertexCount-50 , -10, -terrain->vertexCount-100));
 	terrain->scaleSize(2.0f,1.0f,2.0f);
@@ -292,7 +292,9 @@ void Window::idle_callback()
 
 void Window::display_callback(GLFWwindow* window)
 {
+	glEnable(GL_CLIP_DISTANCE0);
 	GLfloat currentFrame = (GLfloat)glfwGetTime();
+	glm::vec4 CP = glm::vec4(0, -1, 0, 10.0f);
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	glm::vec3 rOrigin;
@@ -300,17 +302,21 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(skyboxShader);
-
+	//glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);
 
 	glUseProgram(terrainShader);
+	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
 	terrain->draw(terrainShader);
 	
 	glUseProgram(shaderProgram);
 	//->draw(shaderProgram);
 	//glUseProgram(toonShader);
+	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
 	body1->draw(shaderProgram);
 	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+
+	
 	//glUniform3fv(glGetUniformLocation(toonShader, "eye_position"), 1, &(pos[0]));
 
 	//army->draw(toonShader, glm::mat4(1.0f));

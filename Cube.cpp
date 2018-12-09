@@ -142,3 +142,7 @@ unsigned int Cube::loadCubemap(std::vector<std::string> faces)
 
 	return textureID;
 }
+void Cube::scaleSize(GLfloat scaleV) {
+
+	toWorld = toWorld * glm::scale(glm::mat4(1.0f), glm::vec3(scaleV));
+}
