@@ -124,6 +124,7 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define WOLF_PATH "../wolf.obj"
 #define TOON_VERT "../toonShader.vert"
 #define TOON_FRAG "../toonShader.frag"
+#define SOUND_PATH "../water.mp3"
 int army_length = 1;
 int Window::width;
 int Window::height;
@@ -131,7 +132,11 @@ std::vector<GLfloat> Window::distanceVec;
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 bool Window::toggleSphere;
-Camera camera(glm::vec3(0.0f, -3.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+
+// Sound System
+irrklang::ISoundEngine * SoundEngine;
+
 void Window::initialize_objects()
 {
 	int seed = rand();
@@ -148,22 +153,39 @@ void Window::initialize_objects()
 	horse = new Geometry(HORSE_PATH);
 	wolf = new Geometry(WOLF_PATH);
 	cow = new Geometry(COW_PATH);
-	horsemtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -8.0f, 0.0f)));
+
+	glm::vec3 horsepos = { 0.0f, 0.0f, 0.0f };
+	horsemtx = new Transform(glm::translate(glm::mat4(1.0f), horsepos));
 	horsemtx->rotate(90);
 	horsemtx->addChild(horse);
+	
+	float heighth = terrain->getHeight(horsepos.x, horsepos.z, generator);
+	horsemtx->translateY(heighth);
 
-	wolfmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(8.0f, -8.0f, -6.0f)));
+
+	glm::vec3 wolfpos = { 4.0f, 0.0f, -5.0f };
+	wolfmtx = new Transform(glm::translate(glm::mat4(1.0f),wolfpos));
 	wolfmtx->rotate(90);
 	wolfmtx->addChild(wolf);
+	float heightw = terrain->getHeight(wolfpos.x, wolfpos.z, generator);
+	wolfmtx->translateY(heightw);
 
-	cowmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(-4.0f, -8.0f, -9.0f)));
+
+	glm::vec3 cowpos = { -4.0f, -8.0f, -9.0f };
+	cowmtx = new Transform(glm::translate(glm::mat4(1.0f), cowpos));
 	cowmtx->rotate(90);
 	cowmtx->addChild(cow);
+	float heightc = terrain->getHeight(cowpos.x, cowpos.z, generator);
+	cowmtx->translateY(heightc);
 
-	sphere_mtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -6.0f, 0.0f)));
-	sphere_mtx->scalesize(0.1);
+	glm::vec3 spherepos = { 0.0f, 0.0f, 0.0f };
+	sphere_mtx = new Transform(glm::translate(glm::mat4(1.0f), spherepos));
+	sphere_mtx->scalesize(0.5);
 	sphere_mtx->addChild(sphere);
 	sphere_mtx->SPHERE = true;
+	float heights = terrain->getHeight(spherepos.x, spherepos.z, generator);
+	sphere_mtx->translateY(heights);
+
 
 	modelMtx = new Transform(glm::mat4(1.0f));
 	modelMtx->addChild(horsemtx);
@@ -202,6 +224,11 @@ void Window::initialize_objects()
 	boxCP = glGetUniformLocation(skyboxShader, "clippingPlane");
 	objCP = glGetUniformLocation(toonShader, "clippingPlane");
 	terrainCP = glGetUniformLocation(terrainShader, "clippingPlane");
+
+
+
+	SoundEngine = irrklang::createIrrKlangDevice();
+
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -216,6 +243,7 @@ void Window::clean_up()
     glDeleteProgram(sphereShader);
 	glDeleteProgram(terrainShader);
 	glDeleteProgram(toonShader);
+	delete(SoundEngine);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -352,19 +380,15 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 	
 
-		
+		if (key == GLFW_KEY_1) 
+		{
+			SoundEngine->play2D(SOUND_PATH, GL_TRUE);
+		}
 		
 		//spot light rotation switch
 		if (key == GLFW_KEY_2) {
 
-			if (currObj->sptRot) {
-				currObj->sptRot= false;
-
-			}
-			else {
-				currObj->sptRot = true;
-
-			}
+			SoundEngine->stopAllSounds();
 		}
 
 
@@ -414,21 +438,24 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		//Camera movement controls (FPS style)
 		if (key == GLFW_KEY_W)	//Forward
 		{
+			//modelballMtx->translateZ(-0.2f);
 			camera.handleKeyPress(FORWARD, deltaTime);
 		}
 		else if (key == GLFW_KEY_S) //Back
 		{
-
+			//modelballMtx->translateZ(0.2f);
 			camera.handleKeyPress(BACKWARD, deltaTime);
 
 		}
 		//cout << "z" << endl;
 		else if (key == GLFW_KEY_A) //Left
 		{
+			//modelballMtx->translateX(-0.2f);
 			camera.handleKeyPress(LEFT, deltaTime);
 		}
 		else if (key == GLFW_KEY_D) //Right
 		{
+			//modelballMtx->translateX(0.2f);
 			camera.handleKeyPress(RIGHT, deltaTime);
 		}
 		else if (key == GLFW_KEY_UP)
