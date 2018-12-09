@@ -112,7 +112,7 @@ public:
 		this->side = glm::normalize(side);
 	}
 public:
-	glm::vec3 forward, up, side, viewUp, position;
+	static glm::vec3 forward, up, side, viewUp, position;
 	GLfloat yawAngle, pitchAngle;
 	GLfloat moveSpeed, mouse_sensitivity, mouse_zoom; 
 };

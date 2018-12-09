@@ -24,20 +24,32 @@ public:
 
 	GLuint VBO, VAO, EBO,reflectionFrameBuffer,refractionFrameBuffer;
 	//depth buffer
-	GLuint reflectionDB, refractionDP;
+	GLuint reflectionDB, refractionDB;
 	GLuint reflectionTexture, refractionTexture;
 	GLuint uProjection, uModelview;
 	glm::vec3 position;
-	glm::vec3 toWorld;
+	glm::mat4 toWorld;
+	GLfloat size=1000;
 	GLuint dudvMap;
 	GLuint texture[1];
-
+	GLint reflec_width = 1920;
+	GLint reflec_height = 1080;
+	GLint refrac_width = 1920;
+	GLint refrac_height = 1080;
+	GLfloat waterHeight = 0.1;
+	GLdouble startTime,curTime;
 
 	Water();
 	~Water();
 	GLuint loadTexture(std::string str);
 	void draw(GLuint);
 	void update();
+	void bindReflectionFrameBuffer();
+	void bindRefractionFrameBuffer();
+	GLfloat getHeight();
+	void scale(GLfloat);
+	void translate(glm::vec3);
+
 
 	
 
