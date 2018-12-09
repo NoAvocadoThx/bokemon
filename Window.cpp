@@ -344,7 +344,7 @@ void Window::display_callback(GLFWwindow* window)
 	//->draw(shaderProgram);
 	//glUseProgram(toonShader);
 	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
-	body1->draw(shaderProgram);
+	//body1->draw(shaderProgram);
 	
 	//glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
 
@@ -354,7 +354,7 @@ void Window::display_callback(GLFWwindow* window)
 	//ball->draw(shaderProgram);
 	
 	
-	modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
+	//modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
 
 
 	glUseProgram(toonShader);
