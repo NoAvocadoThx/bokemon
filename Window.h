@@ -26,6 +26,7 @@
 #include "camera.h"
 #include "irrKlang.h"
 #include <iostream>
+#include "ball.h"
 using namespace irrklang;
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>                  // ...so now that's defined we can import GLM itself.

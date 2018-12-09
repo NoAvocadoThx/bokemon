@@ -38,7 +38,7 @@ GLuint terrainCP;
 
 
 ROBObject *body1,*body2,*body3, *ball2;
-//BALLObject *ball;
+BALLObject *ball;
 
 Curve *c0;
 Curve *c1;
@@ -210,7 +210,7 @@ void Window::initialize_objects()
 	}
 
 	
-	
+	ball = new BALLObject(BALL_PATH);
 
 
 	// Load the shader program. Make sure you have the correct filepath up top
@@ -341,16 +341,17 @@ void Window::display_callback(GLFWwindow* window)
 	
 	glUseProgram(shaderProgram);
 	//army->draw(shaderProgram, glm::mat4(1.0f));
-	modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
-
-
+	//modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
+	//ball->draw(shaderProgram);
+	
+	
 	glUseProgram(toonShader);
 	//body1->draw(shaderProgram);
-	//ball->draw(shaderProgram);
+	
 	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
 	army->draw(toonShader, glm::mat4(1.0f));
-	
+	//ball->draw(toonShader);
 	//glUniform3fv(glGetUniformLocation(toonShader, "eye_position"), 1, &(pos[0]));
 
 	//army->draw(toonShader, glm::mat4(1.0f));
@@ -461,22 +462,22 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		else if (key == GLFW_KEY_UP)
 		{
 			//ball->move(deltaTime);
-			modelballMtx->translateZ(-0.1f);
+			modelballMtx->translateZ(-deltaTime);
 		}
 		else if (key == GLFW_KEY_DOWN)
 		{
 			//ball->move(-deltaTime);
-			modelballMtx->translateZ(0.1f);
+			modelballMtx->translateZ(deltaTime);
 		}
 		else if (key == GLFW_KEY_RIGHT)
 		{
 			//ball->spin(deltaTime);
-			modelballMtx->translateX(0.1f);
+			modelballMtx->translateX(deltaTime);
 		}
 		else if (key == GLFW_KEY_LEFT)
 		{
 			//ball->spin(-deltaTime);
-			modelballMtx->translateX(-0.1f);
+			modelballMtx->translateX(-deltaTime);
 		}
 		V = camera.getViewMatrix();
 	}

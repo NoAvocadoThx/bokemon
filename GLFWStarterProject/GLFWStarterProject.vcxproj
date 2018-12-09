@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ball.h" />
     <ClInclude Include="..\camera.h" />
     <ClInclude Include="..\Curve.h" />
     <ClInclude Include="..\Geometry.h">
@@ -43,6 +44,7 @@
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\ball.cpp" />
     <ClCompile Include="..\Curve.cpp" />
     <ClCompile Include="..\Geometry.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
