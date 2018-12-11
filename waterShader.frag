@@ -7,10 +7,12 @@ out vec4 color;
 
 uniform sampler2D reflectionTexture;
 uniform sampler2D refractionTexture;
+uniform float flow;
+uniform sampler2D dudv;
 
 void main(){
 
 vec4 reflection = texture(reflectionTexture, textureCoods);
 vec4 refraction = texture(refractionTexture, textureCoods);
-color = vec4(0.5,0.5,0.3,1.0);
+color = mix(reflection,refraction,0.5f);
 }

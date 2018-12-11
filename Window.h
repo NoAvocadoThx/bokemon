@@ -27,6 +27,7 @@
 #include "irrKlang.h"
 #include <iostream>
 #include "ball.h"
+#include "Water.h"
 using namespace irrklang;
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>                  // ...so now that's defined we can import GLM itself.
@@ -68,7 +69,9 @@ public:
 	static void calculate();
 	static void translateCamera(glm::vec3 transVec);
 	static void resetCamera();
-	static void calculateClipPlane();
+	static void renderReflection();
+	static void renderRefraction();
+	static void renderAll();
 };
 
 #endif

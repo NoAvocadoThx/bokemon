@@ -36,7 +36,7 @@ public:
 	GLint reflec_height = 1080;
 	GLint refrac_width = 1920;
 	GLint refrac_height = 1080;
-	GLfloat waterHeight = 0.1;
+	GLfloat waterHeight = 2.0f;
 	GLdouble startTime,curTime;
 
 	Water();
@@ -46,6 +46,7 @@ public:
 	void update();
 	void bindReflectionFrameBuffer();
 	void bindRefractionFrameBuffer();
+	void unbindCurrentFrameBuffer();
 	GLfloat getHeight();
 	void scale(GLfloat);
 	void translate(glm::vec3);

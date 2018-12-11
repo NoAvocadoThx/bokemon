@@ -6,12 +6,14 @@
 Water::Water() {
 	toWorld = glm::mat4(1.0f);
 	scale(1000.0f);
-	translate(glm::vec3(-size / 2, 0, - size / 2));
-	startTime = glfwGetTime();
+	translate(glm::vec3(-size/2 , -8.5f, - size/2 ));
+	//startTime = glfwGetTime();
 	GLfloat vertices[] = {-1,-1,-1,1,1,-1,1,-1,-1,1,1,1};
+	texture[0] = loadTexture("../Water.jpg");
+	dudvMap = loadTexture("../WaterDUDV");
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	//glGenBuffers(1, &EBO);
 
 
 	
@@ -75,8 +77,44 @@ void Water::draw(GLuint shaderProgram) {
 	//glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), Camera::position.x, Camera::position.y, Camera::position.z);
 	glBindVertexArray(VAO);
 	curTime = glfwGetTime();
+	GLfloat flow=0;
+	flow+= 0.2*(curTime - startTime);
+	glUniform1f(glGetUniformLocation(shaderProgram, "flow"), flow);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, reflectionTexture);
+	glUniform1i(glGetUniformLocation(shaderProgram, "reflectionTexture"), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, refractionTexture);
+	glUniform1i(glGetUniformLocation(shaderProgram, "refractionTexture"), 1);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, dudvMap);
+	glUniform1i(glGetUniformLocation(shaderProgram, "dudv"), 3);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertices));
+
+	glBindVertexArray(0);
+}
+
+void Water::bindReflectionFrameBuffer() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFrameBuffer);
+	glViewport(0, 0, reflec_width, reflec_height);
+}
+void Water::bindRefractionFrameBuffer() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, refractionFrameBuffer);
+	glViewport(0, 0, refrac_width, refrac_height);
+}
+void Water::unbindCurrentFrameBuffer() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, Window::width, Window::height);
 }
 GLuint Water::loadTexture(std::string str) {
+	GLuint texture;
 	
 	if (str.c_str() == NULL) {
 		std::cout << "null" << std::endl;
@@ -85,9 +123,9 @@ GLuint Water::loadTexture(std::string str) {
 	//unsigned char* tdata = loadPPM(str.c_str(), twidth, theight);
 	//unsigned int textureID;
 	//tetxure 1
-	glGenTextures(1, &texture[0]);
+	glGenTextures(1, &texture);
 
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	int width, height, nrChannels;
 	unsigned char *data = stbi_load(str.c_str(), &width, &height, &nrChannels, 0);
@@ -96,11 +134,11 @@ GLuint Water::loadTexture(std::string str) {
 	stbi_image_free(data);
 
 	glGenerateMipmap(GL_TEXTURE_2D);  // Generate mipmaps
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 	
 }
 

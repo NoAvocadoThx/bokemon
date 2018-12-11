@@ -17,6 +17,7 @@ GLint reflectShader;
 GLint curveShader;
 GLint sphereShader;
 GLint terrainShader;
+GLint waterShader;
 GLfloat fov = 45.0f;
 GLint robotNum;
 GLfloat distance;
@@ -76,6 +77,7 @@ glm::vec3 currPt;
 glm::vec3 selectColor= glm::vec3(0.4f, 0.3f, 0.1f);
 
 Terrain *terrain;
+Water *water;
 HeightGenerator *generator;
 GLint vertexCount = 128;
 bool Window::SPHERE_SHOW = false;
@@ -125,6 +127,8 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define TOON_VERT "../toonShader.vert"
 #define TOON_FRAG "../toonShader.frag"
 #define SOUND_PATH "../water.mp3"
+#define WATER_VERT "../waterShader.vert"
+#define WATER_FRAG "../waterShader.frag"
 int army_length = 1;
 int Window::width;
 int Window::height;
@@ -146,7 +150,7 @@ void Window::initialize_objects()
 	terrain = new Terrain(generator);
 	terrain->translate(glm::vec3(-terrain->vertexCount - 50, -10, -terrain->vertexCount - 100));
 	terrain->scaleSize(2.0f, 1.0f, 2.0f);
-
+	water = new Water();
 
 	//body1 = new ROBObject(HORSE_PATH);
 	sphere = new Geometry(BALL_PATH);
@@ -221,6 +225,7 @@ void Window::initialize_objects()
     sphereShader = LoadShaders(SPHERE_VERT,SPHERE_FRAG);
 	terrainShader = LoadShaders(TERRAIN_VERT, TERRAIN_FRAG);
 	toonShader = LoadShaders(TOON_VERT, TOON_FRAG);
+	waterShader = LoadShaders(WATER_VERT, WATER_FRAG);
 	boxCP = glGetUniformLocation(skyboxShader, "clippingPlane");
 	objCP = glGetUniformLocation(toonShader, "clippingPlane");
 	terrainCP = glGetUniformLocation(terrainShader, "clippingPlane");
@@ -243,6 +248,7 @@ void Window::clean_up()
     glDeleteProgram(sphereShader);
 	glDeleteProgram(terrainShader);
 	glDeleteProgram(toonShader);
+	glDeleteProgram(waterShader);
 	delete(SoundEngine);
 }
 
@@ -324,45 +330,16 @@ void Window::display_callback(GLFWwindow* window)
 {
 	glEnable(GL_CLIP_DISTANCE0);
 	GLfloat currentFrame = (GLfloat)glfwGetTime();
-	glm::vec4 CP = glm::vec4(0, -1, 0, 10.0f);
+	
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	glm::vec3 rOrigin;
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(skyboxShader);
-	//glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
-	cube->draw(skyboxShader);
-	
-	glUseProgram(terrainShader);
-	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
-	terrain->draw(terrainShader);
-	
-	glUseProgram(shaderProgram);
-
-	//->draw(shaderProgram);
-	//glUseProgram(toonShader);
-	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
-	//body1->draw(shaderProgram);
-	
-	//glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
-
-	//army->draw(shaderProgram, glm::mat4(1.0f));
-
-	//modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
-	//ball->draw(shaderProgram);
-	
-	
-	//modelballMtx->draw(shaderProgram, glm::mat4(1.0f));
-
-
-	glUseProgram(toonShader);
-	//body1->draw(shaderProgram);
-	
-	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
-	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
-	army->draw(toonShader, glm::mat4(1.0f));
+	renderReflection();
+	renderRefraction();
+	renderAll();
 	//ball->draw(toonShader);
 	//glUniform3fv(glGetUniformLocation(toonShader, "eye_position"), 1, &(pos[0]));
 
@@ -378,7 +355,83 @@ void Window::display_callback(GLFWwindow* window)
 	//dirSphere->scaleSize(4.0f);
 	robotNum = 0;
 }
+void Window::renderReflection() {
+	water->bindReflectionFrameBuffer();
+	glm::vec4 CP = glm::vec4(0, -1, 0, -water->getHeight());
+	glUseProgram(skyboxShader);
+	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
+	cube->draw(skyboxShader);
 
+	glUseProgram(terrainShader);
+	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
+	terrain->draw(terrainShader);
+	glUseProgram(shaderProgram);
+
+	//->draw(shaderProgram);
+	glUseProgram(toonShader);
+	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
+	//glUseProgram(toonShader);
+	//body1->draw(shaderProgram);
+
+	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
+	army->draw(toonShader, glm::mat4(1.0f));
+	water->unbindCurrentFrameBuffer();
+}
+void Window::renderRefraction() {
+	water->bindRefractionFrameBuffer();
+	glm::vec4 CP = glm::vec4(0, -1, 0, water->getHeight());
+	
+
+	glUseProgram(terrainShader);
+	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
+	terrain->draw(terrainShader);
+	glUseProgram(shaderProgram);
+
+	//->draw(shaderProgram);
+	glUseProgram(toonShader);
+	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
+	//glUseProgram(toonShader);
+	//body1->draw(shaderProgram);
+
+	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
+	army->draw(toonShader, glm::mat4(1.0f));
+	glUseProgram(skyboxShader);
+	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
+	cube->draw(skyboxShader);
+	water->unbindCurrentFrameBuffer();
+}
+void Window::renderAll() {
+	glDisable(GL_CLIP_DISTANCE0);
+	glm::vec4 CP = glm::vec4(0, -1, 0, 1000.0f);
+
+
+	glUseProgram(terrainShader);
+	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
+	terrain->draw(terrainShader);
+	glUseProgram(shaderProgram);
+
+	//->draw(shaderProgram);
+	glUseProgram(toonShader);
+	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
+	//glUseProgram(toonShader);
+	//body1->draw(shaderProgram);
+
+	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
+	army->draw(toonShader, glm::mat4(1.0f));
+	
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glUseProgram(waterShader);
+	water->draw(waterShader);
+	//glDisable(GL_BLEND);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(skyboxShader);
+	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
+	cube->draw(skyboxShader);
+}
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	
@@ -562,3 +615,5 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 	camera.handleMouseMove(xoffset, yoffset);
 	V = camera.getViewMatrix();
 }
+
+
