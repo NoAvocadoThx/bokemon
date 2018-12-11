@@ -127,6 +127,7 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define TOON_VERT "../toonShader.vert"
 #define TOON_FRAG "../toonShader.frag"
 #define SOUND_PATH "../water.mp3"
+#define SMASH_PATH "../smash.mp3"
 #define WATER_VERT "../waterShader.vert"
 #define WATER_FRAG "../waterShader.frag"
 int army_length = 1;
@@ -456,7 +457,10 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 
 			SoundEngine->stopAllSounds();
 		}
+		if (key == GLFW_KEY_3) {
 
+			SoundEngine->play2D(SMASH_PATH, GL_TRUE);
+		}
 
 		if (key == GLFW_KEY_P) {
 
