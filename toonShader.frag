@@ -12,9 +12,11 @@ void main()
 {
 	float intensity;
 
-	vec3 lightDirection = FragPos - vec3(100.0, 100.0, 100.0);
+	//vec3 lightDirection = FragPos - vec3(100.0, 100.0, 100.0);
 	//vec3 lightDirection = FragPos;
+	vec3 lightDirection = vec3(25.0,25.0,25.0);
 	intensity = dot(normalize(lightDirection), normalize(Normal));
+	//intensity = dot(lightDirection, normalize(Normal));
 
 	if (intensity > 0.95)
 		color = vec4(1.0,0.5,0.5,1.0);
@@ -22,15 +24,18 @@ void main()
 		color = vec4(0.6,0.3,0.3,1.0);
 	else if (intensity > 0.25)
 		color = vec4(0.4,0.2,0.2,1.0);
-	else
+	else if (intensity > 0.01)
 		color = vec4(0.2,0.1,0.1,1.0);
-/*
-	float edgeChecker = dot(normalize(cameraPosition), normalize(Normal));
-	if(-0.5 < edgeChecker && edgeChecker < 0.5)
+	else
+		color = vec4(0.0,0.0,0.0,1.0);
+
+		
+	float edge = dot(normalize(cameraPosition), normalize(Normal));
+	if(edge < 0.01)
 	{
 	    color = vec4(0.0, 0.0, 0.0, 1.0);
 	}
-	*/
+	
 }
 
 /*

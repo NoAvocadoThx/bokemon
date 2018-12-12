@@ -69,6 +69,9 @@
     <ClInclude Include="..\ball.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\BoundingBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -114,6 +117,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\ball.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BoundingBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -171,6 +177,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="..\waterShader.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\boundingShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\boundingShader.vert">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

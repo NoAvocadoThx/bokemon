@@ -37,6 +37,8 @@ private:
 	std::vector<unsigned int> indices;
 
 public:
+	std::vector<glm::vec3> boxVertices;
+	std::vector<GLfloat> boundingbox;
 	glm::vec3 position;
 	int object_mode;
 	glm::vec3 color_diff;

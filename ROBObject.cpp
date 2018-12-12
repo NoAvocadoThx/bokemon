@@ -256,23 +256,153 @@ void ROBObject::scaleProcess()
 	else {
 		scale = abs(scalemin);
 	}
-	if (this->object_mode != 3) {
-		this->centerx = (maxx + minx) / 2;
-		this->centery = (maxy + miny) / 2;
-		this->centerz = (maxz + minz) / 2;
-	}
-	else {
-		this->centerx = (maxx + minx) + 40.0f;
-		this->centery = (maxy + miny);
-		this->centerz = (maxz + minz);
-	}
+
+	this->centerx = (maxx + minx) / 2;
+	this->centery = (maxy + miny) / 2;
+	this->centerz = (maxz + minz) / 2;
+	glm::vec3 center = glm::vec3(centerx, centery, centerz);
 	for (unsigned int i = 0; i < vertices.size(); i++) {
 
-		vertices[i].x = (vertices[i].x - this->centerx)*scale;
-		vertices[i].y = (vertices[i].y - this->centery)*scale;
-		vertices[i].z = (vertices[i].z - this->centerz)*scale;
+		vertices[i].x = (vertices[i].x - this->centerx);
+		vertices[i].y = (vertices[i].y - this->centery);
+		vertices[i].z = (vertices[i].z - this->centerz);
 
 	}
+	float dimX, dimY, dimZ;
+	dimX = maxx - minx;
+	dimY = maxy - miny;
+	dimZ = maxz - minz;
+
+	// scale all vertices using the largest dimension, uniform scale
+	if (dimX >= dimY && dimX >= dimZ) {
+		for (int i = 0; i < vertices.size(); i++) {
+			vertices[i] = glm::vec3(vertices[i].x / dimX, vertices[i].y / dimX, vertices[i].z / dimX);
+		}
+	}
+	else if (dimY >= dimX && dimY >= dimZ) {
+		for (int i = 0; i < vertices.size(); i++) {
+			vertices[i] = glm::vec3(vertices[i].x / dimY, vertices[i].y / dimY, vertices[i].z / dimY);
+		}
+	}
+	else if (dimZ >= dimX && dimZ >= dimY) {
+		for (int i = 0; i < vertices.size(); i++) {
+			vertices[i] = glm::vec3(vertices[i].x / dimZ, vertices[i].y / dimZ, vertices[i].z / dimZ);
+		}
+	}
+
+	float minX, maxX, minY, maxY, maxZ, minZ;
+	minX = INFINITY, minY = INFINITY, minZ = INFINITY;   // min vertex
+	maxX = -INFINITY, maxY = -INFINITY, maxZ = -INFINITY;   // max vertex
+
+	glm::vec3 minVertX, minVertY, minVertZ;
+	glm::vec3 maxVertX, maxVertY, maxVertZ;
+
+	// search for bounding box dimension
+	for (int i = 0; i < vertices.size(); i++) {
+		if (vertices[i].x < minX) {
+			minX = vertices[i].x;
+			minVertX = vertices[i];
+		}
+		if (vertices[i].y < minY) {
+			minY = vertices[i].y;
+			minVertY = vertices[i];
+		}
+		if (vertices[i].z < minZ) {
+			minZ = vertices[i].z;
+			minVertZ = vertices[i];
+		}
+		if (vertices[i].x > maxX) {
+			maxX = vertices[i].x;
+			maxVertX = vertices[i];
+		}
+		if (vertices[i].y > maxY) {
+			maxY = vertices[i].y;
+			maxVertY = vertices[i];
+		}
+		if (vertices[i].z > maxZ) {
+			maxZ = vertices[i].z;
+			maxVertZ = vertices[i];
+		}
+	}
+
+	boxVertices.push_back(maxVertX);
+	boxVertices.push_back(minVertX);
+	boxVertices.push_back(maxVertY);
+	boxVertices.push_back(minVertY);
+	boxVertices.push_back(maxVertZ);
+	boxVertices.push_back(minVertZ);
+
+	// bounding box
+	boundingbox.push_back(minX);
+	boundingbox.push_back(minY);
+	boundingbox.push_back(maxZ);
+	//boxVertices.push_back(glm::vec3(minX,minY,maxZ));
+
+	boundingbox.push_back(maxX);
+	boundingbox.push_back(minY);
+	boundingbox.push_back(maxZ);
+	//boxVertices.push_back(glm::vec3(maxX,minY,maxZ));
+
+	boundingbox.push_back(maxX);
+	boundingbox.push_back(maxY);
+	boundingbox.push_back(maxZ);
+	//boxVertices.push_back(glm::vec3(maxX,maxY,maxZ));
+
+	boundingbox.push_back(minX);
+	boundingbox.push_back(maxY);
+	boundingbox.push_back(maxZ);
+	//boxVertices.push_back(glm::vec3(minX,maxY,maxZ));
+
+	/* */
+	boundingbox.push_back(minX);
+	boundingbox.push_back(minY);
+	boundingbox.push_back(maxZ);
+
+	boundingbox.push_back(minX);
+	boundingbox.push_back(minY);
+	boundingbox.push_back(minZ);
+	//boxVertices.push_back(glm::vec3(minX,minY,minZ));
+
+	boundingbox.push_back(maxX);
+	boundingbox.push_back(minY);
+	boundingbox.push_back(minZ);
+	//boxVertices.push_back(glm::vec3(maxX,minY,minZ));
+
+	boundingbox.push_back(maxX);
+	boundingbox.push_back(maxY);
+	boundingbox.push_back(minZ);
+	//boxVertices.push_back(glm::vec3(maxX,maxY,minZ));
+
+	boundingbox.push_back(minX);
+	boundingbox.push_back(maxY);
+	boundingbox.push_back(minZ);
+	//boxVertices.push_back(glm::vec3(minX,maxY,minZ));
+
+	/* */
+	boundingbox.push_back(minX);
+	boundingbox.push_back(minY);
+	boundingbox.push_back(minZ);
+
+	boundingbox.push_back(minX);
+	boundingbox.push_back(maxY);
+	boundingbox.push_back(maxZ);
+	boundingbox.push_back(minX);
+	boundingbox.push_back(maxY);
+	boundingbox.push_back(minZ);
+
+	boundingbox.push_back(maxX);
+	boundingbox.push_back(minY);
+	boundingbox.push_back(maxZ);
+	boundingbox.push_back(maxX);
+	boundingbox.push_back(minY);
+	boundingbox.push_back(minZ);
+
+	boundingbox.push_back(maxX);
+	boundingbox.push_back(maxY);
+	boundingbox.push_back(maxZ);
+	boundingbox.push_back(maxX);
+	boundingbox.push_back(maxY);
+	boundingbox.push_back(minZ);
 
 }
 unsigned char*  ROBObject::loadPPM(const char* filename, int& width, int& height)
