@@ -29,20 +29,20 @@ public:
 	GLuint uProjection, uModelview;
 	glm::vec3 position;
 	glm::mat4 toWorld;
-	GLfloat size=1000;
+	GLfloat size=100;
 	GLuint dudvMap;
 	GLuint texture[1];
 	GLint reflec_width = 1920;
 	GLint reflec_height = 1080;
 	GLint refrac_width = 1920;
 	GLint refrac_height = 1080;
-	GLfloat waterHeight = 2.0f;
+	GLfloat waterHeight = 1.0f;
 	GLdouble startTime,curTime;
 
 	Water();
 	~Water();
 	GLuint loadTexture(std::string str);
-	void draw(GLuint);
+	void draw(GLuint,glm::vec3);
 	void update();
 	void bindReflectionFrameBuffer();
 	void bindRefractionFrameBuffer();

@@ -5,12 +5,27 @@
 
 Water::Water() {
 	toWorld = glm::mat4(1.0f);
-	scale(1000.0f);
-	translate(glm::vec3(-size/2 , -8.5f, - size/2 ));
-	//startTime = glfwGetTime();
-	GLfloat vertices[] = {-1,-1,-1,1,1,-1,1,-1,-1,1,1,1};
+	
+	
+	//translate(glm::vec3(1, waterHeight, 1));
+	startTime = glfwGetTime();
+	GLfloat vertices[] = { 0.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+
+		0.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 0.0f,
+
+	 };
+	//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(size, 1.0f, size));
+	scale(800);
+	translate(glm::vec3(-500, -9.5f, -500));
+	//toWorld = glm::translate(scale, glm::vec3(-10, -4, -10));
+	//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(100, 1.0f, 100));
+	//toWorld = glm::translate(scale, glm::vec3(-25, -5, -20));
 	texture[0] = loadTexture("../Water.jpg");
-	dudvMap = loadTexture("../WaterDUDV");
+	dudvMap = loadTexture("../WaterDUDV.jpg");
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	//glGenBuffers(1, &EBO);
@@ -27,7 +42,7 @@ Water::Water() {
 		GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't
 		3 * sizeof(GLfloat), // Offset between consecutive indices. Since each of our vertices have 3 floats, they should have the size of 3 floats in between
 		(GLvoid*)0); // Offset of the first vertex's component. In our case it's 0 since we don't pad the vertices array wi
-	glEnableVertexAttribArray(0);
+	//glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
@@ -35,6 +50,7 @@ Water::Water() {
 	//first reflection FB
 	glGenFramebuffers(1, &reflectionFrameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFrameBuffer);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	glGenTextures(1, &reflectionTexture);
 	glBindTexture(GL_TEXTURE_2D, reflectionTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, reflec_width, reflec_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -46,6 +62,7 @@ Water::Water() {
 	//refraction FB
 	glGenFramebuffers(1, &refractionFrameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, refractionFrameBuffer);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	glGenTextures(1, &refractionTexture);
 	glBindTexture(GL_TEXTURE_2D, refractionTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, refrac_width, refrac_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -66,19 +83,35 @@ Water::Water() {
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, refrac_width, refrac_height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, refractionDB);
 
+
+}
+Water::~Water()
+{
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteVertexArrays(1, &VBO);
+	glDeleteVertexArrays(1, &EBO);
+	glDeleteFramebuffers(1, &reflectionFrameBuffer);
+	glDeleteFramebuffers(1, &refractionFrameBuffer);
+	glDeleteFramebuffers(1, &refractionDB);
+	glDeleteFramebuffers(1, &reflectionDB);
 }
 
-
-void Water::draw(GLuint shaderProgram) {
+void Water::draw(GLuint shaderProgram,glm::vec3 cam) {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glm::mat4 modelview = Window::V * toWorld;
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &toWorld[0][0]);
-	//glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), Camera::position.x, Camera::position.y, Camera::position.z);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelview"), 1, GL_FALSE, &modelview[0][0]);
+	glUniform3f(glGetUniformLocation(shaderProgram, "camPos"),cam.x, cam.y, cam.z );
 	glBindVertexArray(VAO);
 	curTime = glfwGetTime();
 	GLfloat flow=0;
-	flow+= 0.2*(curTime - startTime);
+	float d = curTime - startTime;
+	startTime = curTime;
+	flow+= 0.2*d;
+	flow = fmod(flow, 1.0f);
 	glUniform1f(glGetUniformLocation(shaderProgram, "flow"), flow);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, reflectionTexture);
@@ -90,9 +123,9 @@ void Water::draw(GLuint shaderProgram) {
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, dudvMap);
-	glUniform1i(glGetUniformLocation(shaderProgram, "dudv"), 3);
+	glUniform1i(glGetUniformLocation(shaderProgram, "dudv"), 2);
 
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertices));
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
 
 	glBindVertexArray(0);
 }
@@ -102,12 +135,14 @@ void Water::bindReflectionFrameBuffer() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFrameBuffer);
 	glViewport(0, 0, reflec_width, reflec_height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 void Water::bindRefractionFrameBuffer() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, refractionFrameBuffer);
 	glViewport(0, 0, refrac_width, refrac_height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 void Water::unbindCurrentFrameBuffer() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -133,12 +168,13 @@ GLuint Water::loadTexture(std::string str) {
 	else std::cout << "Image failed to load at path: " << str.c_str() << std::endl;
 	stbi_image_free(data);
 
-	glGenerateMipmap(GL_TEXTURE_2D);  // Generate mipmaps
+	//glGenerateMipmap(GL_TEXTURE_2D);  // Generate mipmaps
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//glBindTexture(GL_TEXTURE_2D, 0);
+	return texture;
 	
 }
 
@@ -147,7 +183,7 @@ GLfloat Water::getHeight() {
 }
 
 void Water::scale(GLfloat scalor) {
-	toWorld *= glm::scale(glm::mat4(1.0), glm::vec3(scalor));
+	toWorld *= glm::scale(glm::mat4(1.0), glm::vec3(scalor,scalor,scalor));
 }
 void Water::translate(glm::vec3 v) {
 	toWorld = glm::translate(glm::mat4(1.0f), v) * toWorld;

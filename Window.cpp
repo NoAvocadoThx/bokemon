@@ -137,6 +137,7 @@ glm::mat4 Window::P;
 glm::mat4 Window::V;
 bool Window::toggleSphere;
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+glm::vec3 camPos;
 
 // Sound System
 irrklang::ISoundEngine * SoundEngine;
@@ -145,10 +146,11 @@ void Window::initialize_objects()
 {
 	int seed = rand();
 	generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
+
 	cube = new Cube();
 	cube->scaleSize(1.0f);
 	terrain = new Terrain(generator);
-	terrain->translate(glm::vec3(-terrain->vertexCount - 50, -10, -terrain->vertexCount - 100));
+	terrain->translate(glm::vec3(-terrain->vertexCount - 50, -7, -terrain->vertexCount - 100));
 	terrain->scaleSize(2.0f, 1.0f, 2.0f);
 	water = new Water();
 
@@ -250,6 +252,7 @@ void Window::clean_up()
 	glDeleteProgram(toonShader);
 	glDeleteProgram(waterShader);
 	delete(SoundEngine);
+
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -323,11 +326,13 @@ void Window::idle_callback()
 	// Call the update function the cube
 	//currObj->update();
 	//modelMtx->update();
+	camPos = { camera.position.x, camera.position.y, camera.position.z };
 	
 }
 
 void Window::display_callback(GLFWwindow* window)
 {
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CLIP_DISTANCE0);
 	GLfloat currentFrame = (GLfloat)glfwGetTime();
 	
@@ -357,7 +362,7 @@ void Window::display_callback(GLFWwindow* window)
 }
 void Window::renderReflection() {
 	water->bindReflectionFrameBuffer();
-	glm::vec4 CP = glm::vec4(0, -1, 0, -water->getHeight());
+	glm::vec4 CP = glm::vec4(0, 1, 0, 2);
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);
@@ -365,7 +370,7 @@ void Window::renderReflection() {
 	glUseProgram(terrainShader);
 	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
 	terrain->draw(terrainShader);
-	glUseProgram(shaderProgram);
+	//glUseProgram(shaderProgram);
 
 	//->draw(shaderProgram);
 	glUseProgram(toonShader);
@@ -374,38 +379,44 @@ void Window::renderReflection() {
 	//body1->draw(shaderProgram);
 
 	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	//camPos = { camera.position.x, camera.position.y, camera.position.z };
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
 	army->draw(toonShader, glm::mat4(1.0f));
 	water->unbindCurrentFrameBuffer();
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 }
 void Window::renderRefraction() {
+
 	water->bindRefractionFrameBuffer();
-	glm::vec4 CP = glm::vec4(0, -1, 0, water->getHeight());
+	glm::vec4 CP = glm::vec4(0, -1, 0,-2.2);
 	
-
-	glUseProgram(terrainShader);
-	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
-	terrain->draw(terrainShader);
-	glUseProgram(shaderProgram);
-
-	//->draw(shaderProgram);
-	glUseProgram(toonShader);
-	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
-	//glUseProgram(toonShader);
-	//body1->draw(shaderProgram);
-
-	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
-	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
-	army->draw(toonShader, glm::mat4(1.0f));
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);
+	glUseProgram(terrainShader);
+	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
+	terrain->draw(terrainShader);
+	//glUseProgram(shaderProgram);
+
+	//->draw(shaderProgram);
+	glUseProgram(toonShader);
+	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
+	//glUseProgram(toonShader);
+	//body1->draw(shaderProgram);
+
+	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+	//camPos = { camera.position.x, camera.position.y, camera.position.z };
+	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
+	army->draw(toonShader, glm::mat4(1.0f));
+	
 	water->unbindCurrentFrameBuffer();
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 void Window::renderAll() {
-	glDisable(GL_CLIP_DISTANCE0);
+	
 	glm::vec4 CP = glm::vec4(0, -1, 0, 1000.0f);
-
+	//camPos = { camera.position.x, camera.position.y, camera.position.z };
 
 	glUseProgram(terrainShader);
 	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
@@ -419,15 +430,16 @@ void Window::renderAll() {
 	//body1->draw(shaderProgram);
 
 	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
 	army->draw(toonShader, glm::mat4(1.0f));
-	
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_CLIP_DISTANCE0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUseProgram(waterShader);
-	water->draw(waterShader);
-	//glDisable(GL_BLEND);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	water->draw(waterShader,camPos);
+	glDisable(GL_BLEND);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);

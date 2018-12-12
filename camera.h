@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <iomanip>      // std::setprecision
+#include "Window.h"
 
 enum Camera_Movement {
 	FORWARD,
@@ -34,6 +35,7 @@ public:
 		yawAngle(yaw), pitchAngle(pitch)
 	{
 		this->updateCameraVectors();
+		//Window::camPos = position;
 	}
 public:
 
