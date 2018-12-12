@@ -43,7 +43,7 @@ BoundingBox::~BoundingBox() {
 	glDeleteBuffers(1, &EBO);
 }
 
-void BoundingBox::draw(GLuint shaderProgram, bool dead) {
+void BoundingBox::draw(GLuint shaderProgram) {
 	// Calculate combination of the model (toWorld), view (camera inverse), and perspective matrices
 	glm::mat4 MVP = Window::P * Window::V * toWorld;
 	// We need to calculate this because as of GLSL version 1.40 (OpenGL 3.1, released March 2009), gl_ModelViewProjectionMatrix has been
@@ -53,13 +53,13 @@ void BoundingBox::draw(GLuint shaderProgram, bool dead) {
 
 	glBindVertexArray(VAO);
 
-	if (dead) {
+	if (collisionflag) {
 		GLuint color = glGetUniformLocation(shaderProgram, "c");
 		glUniform4f(color, 1.0f, 0.0f, 0.0f, 1.0f);
 	}
 	else {
 		GLuint color = glGetUniformLocation(shaderProgram, "c");
-		glUniform4f(color, 0.0f, 1.0f, 0.0f, 1.0f);
+		glUniform4f(color, 1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	glDrawArrays(GL_LINES, 0, 2);

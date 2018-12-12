@@ -7,7 +7,7 @@ bool keyPressedStatus[1024];
 GLfloat deltaTime = 0.0f; 
 GLfloat lastFrame = 0.0f; 
 
-
+bool debugMode = false;
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
 GLint toonShader;
@@ -18,11 +18,12 @@ GLint curveShader;
 GLint sphereShader;
 GLint terrainShader;
 GLint waterShader;
-GLint boundingShader;
+GLint boundShader;
 GLfloat fov = 45.0f;
 GLint robotNum;
 GLfloat distance;
 bool isIn = false;
+bool played = false;
 glm::vec3 ntl, ntr, nbl, nbr, ftl, ftr, fbl, fbr;
 GLfloat nh, nw, fh, fw;
 GLfloat nDis;
@@ -39,7 +40,7 @@ GLuint terrainCP;
 
 
 BoundingBox *box;
-BoundingBox *testbox;
+BoundingBox *testbox, *testbox1, *testbox2;
 ROBObject *body1,*body2,*body3, *ball2;
 BALLObject *ball;
 
@@ -51,8 +52,8 @@ Curve *c4;
 Curve *c5;
 Curve *c6;
 Curve *c7;
-
-Geometry * horse, *wolf, *cow, *sphere;
+ROBObject * horse, *wolf, *cow, *sphere;
+//Geometry * horse, *wolf, *cow, *sphere;
 Transform * horsemtx, *wolfmtx, *cowmtx, *sphere_mtx, *tempmtx, *temp, *model_sphere;
 Transform * modelMtx, *modelballMtx, *modelbody1Mtx, *modelbody2Mtx, *modelbody3Mtx;
 Transform * singleArmy;
@@ -94,7 +95,6 @@ bool sptToggle = false;
 bool objRotation=false;
 bool mouseRot;
 bool cameraRotation = true;
-bool debugMode;
 bool cull;
 bool renderSphere;
 bool pause=false;
@@ -132,8 +132,8 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define SMASH_PATH "../smash.mp3"
 #define WATER_VERT "../waterShader.vert"
 #define WATER_FRAG "../waterShader.frag"
-#define Bounding_VERT "../boundingShader.vert"
-#define Bounding_FRAG "../boundingShader.frag"
+#define BOUND_VERT "../boundingShader.vert"
+#define BOUND_FRAG "../boundingShader.frag"
 int army_length = 1;
 int Window::width;
 int Window::height;
@@ -145,7 +145,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 glm::vec3 camPos;
 
 // Sound System
-irrklang::ISoundEngine * SoundEngine;
+irrklang::ISoundEngine * SoundEngine1;
 
 void Window::initialize_objects()
 {
@@ -167,74 +167,16 @@ void Window::initialize_objects()
 	box = new BoundingBox(body1->boundingbox, body1->boxVertices);
 	testbox = new BoundingBox(body2->boundingbox, body2->boxVertices);
 
-	body1->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	box->toWorld = body1->toWorld;
-	body2->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	testbox->toWorld = body2->toWorld;
-
-
-	sphere = new Geometry(BALL_PATH);
-	horse = new Geometry(HORSE_PATH);
-	wolf = new Geometry(WOLF_PATH);
-	cow = new Geometry(COW_PATH);
-
-	glm::vec3 horsepos = { 0.0f, 0.0f, 0.0f };
-	horsemtx = new Transform(glm::translate(glm::mat4(1.0f), horsepos));
-	horsemtx->rotate(90);
-	horsemtx->addChild(horse);
 	
-	float heighth = terrain->getHeight(horsepos.x, horsepos.z, generator);
-	horsemtx->translateY(heighth);
+	sphere = new ROBObject(BALL_PATH);
+	horse = new ROBObject(HORSE_PATH);
 
-
-	glm::vec3 wolfpos = { 4.0f, 0.0f, -5.0f };
-	wolfmtx = new Transform(glm::translate(glm::mat4(1.0f),wolfpos));
-	wolfmtx->rotate(90);
-	wolfmtx->addChild(wolf);
-	float heightw = terrain->getHeight(wolfpos.x, wolfpos.z, generator);
-	wolfmtx->translateY(heightw);
-
-
-	glm::vec3 cowpos = { -4.0f, -8.0f, -9.0f };
-	cowmtx = new Transform(glm::translate(glm::mat4(1.0f), cowpos));
-	cowmtx->rotate(90);
-	cowmtx->addChild(cow);
-	float heightc = terrain->getHeight(cowpos.x, cowpos.z, generator);
-	cowmtx->translateY(heightc);
-
-	glm::vec3 spherepos = { 0.0f, 0.0f, 0.0f };
-	sphere_mtx = new Transform(glm::translate(glm::mat4(1.0f), spherepos));
-	sphere_mtx->scalesize(0.5);
-	sphere_mtx->addChild(sphere);
-	sphere_mtx->SPHERE = true;
-	float heights = terrain->getHeight(spherepos.x, spherepos.z, generator);
-	sphere_mtx->translateY(heights);
-
-
-	modelMtx = new Transform(glm::mat4(1.0f));
-	modelMtx->addChild(horsemtx);
-	modelMtx->addChild(wolfmtx);
-	modelMtx->addChild(cowmtx);
-	
-
-	modelballMtx = new Transform(glm::mat4(1.0f));
-	modelballMtx->addChild(sphere_mtx);
-
-
-	army = new Transform(glm::mat4(1.0f));
-	float space = 80.0f; // draws 100 robots
-	for (int x = 0; x < army_length; x++) {
-		for (int z = 0; z < army_length; z++) {
-
-			tempmtx = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3((float)x*space, 0.0f, (float)z*space)));
-
-			tempmtx->children = modelMtx->children;
-			army->addChild(tempmtx);
-		}
-	}
-
-	
-	ball = new BALLObject(BALL_PATH);
+	testbox1 = new BoundingBox(sphere->boundingbox, sphere->boxVertices);
+	testbox2 = new BoundingBox(horse->boundingbox, horse->boxVertices);
+	sphere->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+	testbox1->toWorld = sphere->toWorld;
+	horse->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+	testbox2->toWorld = horse->toWorld;
 
 
 	// Load the shader program. Make sure you have the correct filepath up top
@@ -249,11 +191,10 @@ void Window::initialize_objects()
 	boxCP = glGetUniformLocation(skyboxShader, "clippingPlane");
 	objCP = glGetUniformLocation(toonShader, "clippingPlane");
 	terrainCP = glGetUniformLocation(terrainShader, "clippingPlane");
+	boundShader = LoadShaders(BOUND_VERT, BOUND_FRAG);
 
 
-
-	SoundEngine = irrklang::createIrrKlangDevice();
-
+	SoundEngine1 = irrklang::createIrrKlangDevice();
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -269,8 +210,7 @@ void Window::clean_up()
 	glDeleteProgram(terrainShader);
 	glDeleteProgram(toonShader);
 	glDeleteProgram(waterShader);
-	delete(SoundEngine);
-
+	delete(SoundEngine1);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -344,8 +284,9 @@ void Window::idle_callback()
 	// Call the update function the cube
 	//currObj->update();
 	//modelMtx->update();
+	checkcollision();
 	camPos = { camera.position.x, camera.position.y, camera.position.z };
-	
+
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -399,7 +340,14 @@ void Window::renderReflection() {
 	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
 	//camPos = { camera.position.x, camera.position.y, camera.position.z };
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
-	army->draw(toonShader, glm::mat4(1.0f));
+	//army->draw(toonShader, glm::mat4(1.0f));
+	horse->draw(toonShader);
+	sphere->draw(toonShader);
+	glUseProgram(boundShader);
+	if (debugMode) {
+		testbox1->draw(boundShader);
+		testbox2->draw(boundShader);
+	}
 	water->unbindCurrentFrameBuffer();
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -426,8 +374,18 @@ void Window::renderRefraction() {
 	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
 	//camPos = { camera.position.x, camera.position.y, camera.position.z };
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
-	army->draw(toonShader, glm::mat4(1.0f));
-	
+	//army->draw(toonShader, glm::mat4(1.0f));
+	horse->draw(toonShader);
+	sphere->draw(toonShader);
+
+
+
+	glUseProgram(boundShader);
+	//testbox1->draw(boundingShader, false);
+	if (debugMode) {
+		testbox1->draw(boundShader);
+		testbox2->draw(boundShader);
+	}
 	water->unbindCurrentFrameBuffer();
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -446,11 +404,19 @@ void Window::renderAll() {
 	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
 	//glUseProgram(toonShader);
 	//body1->draw(shaderProgram);
-
 	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
-
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
-	army->draw(toonShader, glm::mat4(1.0f));
+	//army->draw(toonShader, glm::mat4(1.0f));
+	horse->draw(toonShader);
+	sphere->draw(toonShader);
+
+	glUseProgram(boundShader);
+	//testbox1->draw(boundingShader, false);
+	if (debugMode) {
+		testbox1->draw(boundShader);
+		testbox2->draw(boundShader);
+	}
+
 	glDisable(GL_CLIP_DISTANCE0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -478,28 +444,25 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 
 		if (key == GLFW_KEY_1) 
 		{
-			SoundEngine->play2D(SOUND_PATH, GL_TRUE);
+			SoundEngine1->play2D(SOUND_PATH, GL_TRUE);
 		}
 		
 		//spot light rotation switch
 		if (key == GLFW_KEY_2) {
 
-			SoundEngine->stopAllSounds();
+			SoundEngine1->stopAllSounds();
 		}
 		if (key == GLFW_KEY_3) {
 
-			SoundEngine->play2D(SMASH_PATH, GL_TRUE);
+			//SoundEngine->play2D(SMASH_PATH, GL_TRUE);
 		}
+		if (key == GLFW_KEY_5) {
 
-		if (key == GLFW_KEY_P) {
-
-			if (nToggle) {
-				pause = false;
-				nToggle = !nToggle;
+			if (!debugMode) {
+				debugMode = true;
 			}
 			else {
-				pause = true;
-				nToggle = !nToggle;
+				debugMode = false;
 			}
 
 		}
@@ -560,22 +523,26 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		else if (key == GLFW_KEY_UP)
 		{
 			//ball->move(deltaTime);
-			modelballMtx->translateZ(-deltaTime);
+			sphere->translateZ(-deltaTime*10);
+			testbox1->toWorld = sphere->toWorld;
 		}
 		else if (key == GLFW_KEY_DOWN)
 		{
 			//ball->move(-deltaTime);
-			modelballMtx->translateZ(deltaTime);
+			sphere->translateZ(deltaTime*10);
+			testbox1->toWorld = sphere->toWorld;
 		}
 		else if (key == GLFW_KEY_RIGHT)
 		{
 			//ball->spin(deltaTime);
-			modelballMtx->translateX(deltaTime);
+			sphere->translateX(deltaTime*10);
+			testbox1->toWorld = sphere->toWorld;
 		}
 		else if (key == GLFW_KEY_LEFT)
 		{
 			//ball->spin(-deltaTime);
-			modelballMtx->translateX(-deltaTime);
+			sphere->translateX(-deltaTime*10);
+			testbox1->toWorld = sphere->toWorld;
 		}
 		V = camera.getViewMatrix();
 	}
@@ -650,3 +617,27 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 
+void Window::checkcollision() {
+	std::vector<float> bound1 = testbox1->getBoundary();
+	std::vector<float> bound2 = testbox2->getBoundary();
+
+		// check bound
+		if (bound1[0] > bound2[1] && bound1[2] > bound2[3] && bound1[4] > bound2[5] &&
+			bound1[1] < bound2[0] && bound1[3] < bound2[2] && bound1[5] < bound2[4]) {
+			testbox1->collisionflag = true;
+			testbox2->collisionflag = true;
+			if (!played) {
+				SoundEngine1->play2D(SMASH_PATH, GL_FALSE);
+				played = true;
+			}
+		}
+		else {
+			testbox1->collisionflag = false;
+			testbox2->collisionflag = false;
+			played = false;
+		}
+
+
+	
+
+}

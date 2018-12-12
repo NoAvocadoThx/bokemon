@@ -46,6 +46,8 @@ public:
 	glm::vec3 color_ambi;
 	bool IS_SPHERE;
 	float centerx, centery, centerz;
+	float minx, miny, minz, maxx, maxy, maxz;
+	float minX, maxX, minY, maxY, maxZ, minZ;
 	float shininess;
 	float size;
 	float angle;
@@ -71,7 +73,9 @@ public:
 	//void spin(float);
 	GLuint VBO, VBO2, VBO3, VAO, EBO, textureID;
 	void setPosition(glm::vec3 newPos);
-
+	void ROBObject::translateX(float xVal);
+	void ROBObject::translateY(float xVal);
+	void ROBObject::translateZ(float xVal);
 	GLuint uProjection, uModelview, sModelview;
 	void translate(glm::vec3 transVec);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);

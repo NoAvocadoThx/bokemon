@@ -74,6 +74,8 @@
     <None Include="..\boxShader.vert" />
     <None Include="..\curveShader.frag" />
     <None Include="..\curveShader.vert" />
+    <None Include="..\objShader.frag" />
+    <None Include="..\objShader.vert" />
     <None Include="..\reflectShader.frag" />
     <None Include="..\reflectShader.vert" />
     <None Include="..\selectShader.frag" />

@@ -25,12 +25,7 @@ Geometry::Geometry(const char *filepath) {
 	else {
 		IS_SPHERE = false;;
 	}
-	if (strcmp(filepath, "./robot-parts-2018/limb_s.obj") == 0) {
-		IS_LIMB = true;
-	}
-	else {
-		IS_LIMB = false;
-	}
+
 	scaleMat = glm::mat4(1.0f);
 }
 

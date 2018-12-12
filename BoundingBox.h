@@ -13,8 +13,8 @@ public:
 	// constructor destructor
 	BoundingBox(std::vector<GLfloat>, std::vector<glm::vec3>);
 	~BoundingBox();
-
-	void draw(GLuint shaderProgram, bool dead);
+	bool collisionflag = false;
+	void draw(GLuint shaderProgram);
 	std::vector<float> getBoundary();
 
 	glm::mat4 toWorld;

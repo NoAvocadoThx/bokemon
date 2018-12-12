@@ -185,5 +185,11 @@
     <None Include="..\boundingShader.vert">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\objShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\objShader.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

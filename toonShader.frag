@@ -26,9 +26,6 @@ void main()
 		color = vec4(0.4,0.2,0.2,1.0);
 	else if (intensity > 0.01)
 		color = vec4(0.2,0.1,0.1,1.0);
-	else
-		color = vec4(0.0,0.0,0.0,1.0);
-
 		
 	float edge = dot(normalize(cameraPosition), normalize(Normal));
 	if(edge < 0.01)

@@ -74,6 +74,7 @@ public:
 	static void renderReflection();
 	static void renderRefraction();
 	static void renderAll();
+	static void checkcollision();
 };
 
 #endif
