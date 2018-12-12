@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ball.h" />
+    <ClInclude Include="..\BoundingBox.h" />
     <ClInclude Include="..\camera.h" />
     <ClInclude Include="..\Curve.h" />
     <ClInclude Include="..\Geometry.h">
@@ -45,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\ball.cpp" />
+    <ClCompile Include="..\BoundingBox.cpp" />
     <ClCompile Include="..\Curve.cpp" />
     <ClCompile Include="..\Geometry.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -66,6 +68,8 @@
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\boundingShader.frag" />
+    <None Include="..\boundingShader.vert" />
     <None Include="..\boxShader.frag" />
     <None Include="..\boxShader.vert" />
     <None Include="..\curveShader.frag" />

@@ -18,6 +18,7 @@ GLint curveShader;
 GLint sphereShader;
 GLint terrainShader;
 GLint waterShader;
+GLint boundingShader;
 GLfloat fov = 45.0f;
 GLint robotNum;
 GLfloat distance;
@@ -37,7 +38,8 @@ GLuint terrainCP;
 
 
 
-
+BoundingBox *box;
+BoundingBox *testbox;
 ROBObject *body1,*body2,*body3, *ball2;
 BALLObject *ball;
 
@@ -130,6 +132,8 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define SMASH_PATH "../smash.mp3"
 #define WATER_VERT "../waterShader.vert"
 #define WATER_FRAG "../waterShader.frag"
+#define Bounding_VERT "../boundingShader.vert"
+#define Bounding_FRAG "../boundingShader.frag"
 int army_length = 1;
 int Window::width;
 int Window::height;
@@ -153,7 +157,20 @@ void Window::initialize_objects()
 	terrain->scaleSize(2.0f, 1.0f, 2.0f);
 	water = new Water();
 
-	//body1 = new ROBObject(HORSE_PATH);
+
+
+	body1 = new ROBObject(HORSE_PATH);
+	body2 = new ROBObject(HORSE_PATH);
+
+	box = new BoundingBox(body1->boundingbox, body1->boxVertices);
+	testbox = new BoundingBox(body2->boundingbox, body2->boxVertices);
+
+	body1->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	box->toWorld = body1->toWorld;
+	body2->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	testbox->toWorld = body2->toWorld;
+
+
 	sphere = new Geometry(BALL_PATH);
 	horse = new Geometry(HORSE_PATH);
 	wolf = new Geometry(WOLF_PATH);
