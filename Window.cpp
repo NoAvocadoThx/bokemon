@@ -105,6 +105,7 @@ bool reachTop;
 bool normal;
 bool toggleWater;
 bool toggleTerrain;
+bool newHorse;
 
 glm::vec3 xPlane=glm::vec3(1.0f, 0.0f, 0.0f);
 glm::vec3 yPlane=glm::vec3(0.0f, 1.0f, 0.0f);
@@ -296,6 +297,7 @@ void Window::idle_callback()
 	//currObj->update();
 	//modelMtx->update();
 	checkcollision();
+	//sphere->toWorld = camera.getViewMatrix();
 	camPos = { camera.position.x, camera.position.y, camera.position.z };
 	if (walking) {
 		horse->walk();
@@ -304,7 +306,7 @@ void Window::idle_callback()
 	//horse->toWorld[3].y = terrain->getHeightMove(horse->toWorld[3].x, horse->toWorld[3].z);
 	if (!fired) {
 		sphere->toWorld = glm::translate(glm::mat4(1.0f), camPos);
-		sphere->viewdir = camera.getViewDir();
+		sphere->viewdir = camera.forward;
 	}
 	if (sphere->finishedfire) {
 		fired = false;
@@ -544,7 +546,19 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			walking = true;
 			}
 		}
+		if (key == GLFW_KEY_P) {
 
+			if (nToggle) {
+				newHorse = false;
+				nToggle = !nToggle;
+			}
+			else {
+				newHorse = true;
+				spawnHorse();
+				nToggle = !nToggle;
+			}
+
+		}
 	}
 
 	if (action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -706,4 +720,14 @@ void Window::checkcollision() {
 
 	
 
+}
+void Window::spawnHorse() {
+	horse = new ROBObject(HORSE_PATH);
+
+
+	testbox2 = new BoundingBox(horse->boundingbox, horse->boxVertices);
+	
+	horse->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+	horse->translate(glm::vec3(0, 15.0f, 0));
+	testbox2->toWorld = horse->toWorld;
 }

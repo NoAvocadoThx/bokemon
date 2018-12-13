@@ -578,7 +578,7 @@ void ROBObject::translateZ(float zVal) {
 	toWorld = translateMat * toWorld;
 }
 void ROBObject::fire() {
-	glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f + viewdir.x, 0.0f + viewdir.y, -1.0f + viewdir.z)); //
+	glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), viewdir); //
 	//glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 	toWorld = translateMat * toWorld;
 	duration--;
