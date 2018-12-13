@@ -20,6 +20,7 @@ ROBObject::ROBObject(const char *filepath)
 {
 
 	toWorld = glm::mat4(1.0f);
+	//toWorld *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 45.0f, 0.0f));
 	parse(filepath);
 	scaleProcess();
 	//oadTexture();
@@ -552,18 +553,34 @@ void ROBObject::translateZ(float zVal) {
 	toWorld = translateMat * toWorld;
 }
 
-void ROBObject::walk(float x, float y, float z) {
+void ROBObject::walk() {
 	int count = 0;
-	toWorld = toWorld * glm::rotate(glm::mat4(1.0f), 0.5f / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
-	toWorld[3].y = y;
+	toWorld = toWorld * glm::rotate(glm::mat4(1.0f), 1.0f / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+	srand((unsigned)time(0));
+	float i,j,w,v;
+	i = (rand() % 3) + 1;
+	j = (rand() % 3) + 1;
+	w = (rand() % 3) + 1;
+	v = (rand() % 3) + 1;
+	i *= 0.03;
+	j *= 0.03;
+	w *= 0.03;
+	v *= 0.03;
 	
-	/*if (count < 600) {
-		toWorld*=glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
+	if (count < 600) {
+		toWorld*=glm::translate(glm::mat4(1.0f), glm::vec3(i, 0, v));
 	}
 	else if (count >= 600 && count < 1200) {
-		toWorld *= glm::translate(glm::mat4(1.0f), glm::vec3(0, y, -z));
+		toWorld *= glm::translate(glm::mat4(1.0f), glm::vec3(-w, 0, -j));
 	}
 	else if (count >= 1200 && count < 1800) {
-		toWorld *= glm::translate(glm::mat4(1.0f), glm::vec3(x, y, -z));
-	}*/
+		toWorld *= glm::translate(glm::mat4(1.0f), glm::vec3(-i, 0, -v));
+	}
+	else if(count>=1800&&count<2400){
+		toWorld *= glm::translate(glm::mat4(1.0f), glm::vec3(w, 0, j));
+	}
+	else {
+		count = 0;
+	}
+	count++;
 }

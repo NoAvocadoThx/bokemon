@@ -82,7 +82,7 @@ public:
 	GLuint uProjection, uModelview, sModelview;
 	void translate(glm::vec3 transVec);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
-	void walk(float x, float y,float z);
+	void walk();
 };
 
 #endif

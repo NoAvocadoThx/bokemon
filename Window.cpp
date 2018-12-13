@@ -178,12 +178,13 @@ void Window::initialize_objects()
 	sphere = new ROBObject(BALL_PATH);
 	sphere->isSphere = true;
 	horse = new ROBObject(HORSE_PATH);
-
+	
 	testbox1 = new BoundingBox(sphere->boundingbox, sphere->boxVertices);
 	testbox2 = new BoundingBox(horse->boundingbox, horse->boxVertices);
 	sphere->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 10.0f));
 	testbox1->toWorld = sphere->toWorld;
 	horse->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+	horse->translate(glm::vec3(0, 15.0f, 0));
 	testbox2->toWorld = horse->toWorld;
 
 
@@ -295,6 +296,8 @@ void Window::idle_callback()
 	//modelMtx->update();
 	checkcollision();
 	camPos = { camera.position.x, camera.position.y, camera.position.z };
+	horse->walk();
+	testbox2->toWorld = horse->toWorld;
 	//horse->toWorld[3].y = terrain->getHeightMove(horse->toWorld[3].x, horse->toWorld[3].z);
 
 }
