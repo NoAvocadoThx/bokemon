@@ -26,18 +26,19 @@ private:
 	const GLfloat AMP = 260.0f;
 	const GLint OCTAVES = 5;
 	const GLfloat ROUGHNESS = 0.05f; 
-	GLint randomInt(GLint a, GLint b) {
-		GLint random = ((GLint)rand()) / (GLint)RAND_MAX;
-		GLint diff = b - a;
-		GLint r = random * diff;
-		return (GLint)a + r;
+	GLint randomInt() {
+		srand((unsigned)time(0));
+		int i;
+		i = (rand() % 100000) + 1;
+		return i;
 	}
-	GLint seed;
+	
 	GLint xOffset = 0;
 	GLint zOffset = 0;
 
 public:
 	HeightGenerator();
+	GLint seed;
 	HeightGenerator(int gridX, int gridZ, int vertexCount, int seed);
 	GLfloat genHeight(int x, int z);
 	GLfloat getInterpolatedNoise(float, float);

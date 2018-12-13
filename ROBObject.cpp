@@ -12,8 +12,9 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include "Terrain.h"
 using namespace std;
-#define TEXTURE_PATH "./texture.PPM"
+#define TEXTURE_PATH "./leather.PPM"
 ROBObject::ROBObject() {}
 ROBObject::ROBObject(const char *filepath)
 {
@@ -99,10 +100,12 @@ void ROBObject::parse(const char *filepath)
 			fscanf(fp, "%f %f %f\n", &x, &y, &z);
 			temp_normals.push_back(glm::vec3(x, y, z));
 		}
-		if ((c1 == 'v') && (c2 == 't'))
-		{
-			fscanf(fp, "%f %f\n", &x, &y);
-			temp_textures.push_back(glm::vec2(x, y));
+		if (!isSphere) {
+			if ((c1 == 'v') && (c2 == 't'))
+			{
+				fscanf(fp, "%f %f\n", &x, &y);
+				temp_textures.push_back(glm::vec2(x, y));
+			}
 		}
 		if ((c1 == 'f') && (c2 == ' '))
 		{
@@ -474,7 +477,7 @@ void ROBObject::draw(GLuint shaderProgram, glm::mat4 C)
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
-
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &toWorld[0][0]);
 	// Now draw the cube. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
@@ -547,4 +550,20 @@ void ROBObject::translateY(float yVal) {
 void ROBObject::translateZ(float zVal) {
 	glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, zVal)); //
 	toWorld = translateMat * toWorld;
+}
+
+void ROBObject::walk(float x, float y, float z) {
+	int count = 0;
+	toWorld = toWorld * glm::rotate(glm::mat4(1.0f), 0.5f / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+	toWorld[3].y = y;
+	
+	/*if (count < 600) {
+		toWorld*=glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
+	}
+	else if (count >= 600 && count < 1200) {
+		toWorld *= glm::translate(glm::mat4(1.0f), glm::vec3(0, y, -z));
+	}
+	else if (count >= 1200 && count < 1800) {
+		toWorld *= glm::translate(glm::mat4(1.0f), glm::vec3(x, y, -z));
+	}*/
 }

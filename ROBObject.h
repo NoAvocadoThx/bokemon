@@ -21,6 +21,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+#include "Terrain.h"
 
 class ROBObject
 {
@@ -45,6 +46,7 @@ public:
 	glm::vec3 color_spec;
 	glm::vec3 color_ambi;
 	bool IS_SPHERE;
+	bool isSphere;
 	float centerx, centery, centerz;
 	float minx, miny, minz, maxx, maxy, maxz;
 	float minX, maxX, minY, maxY, maxZ, minZ;
@@ -65,6 +67,7 @@ public:
 	void draw(GLuint);
 	void move(float distance);
 	float movespeed;
+	
 	// void update();
 	void scaleProcess();
 	void loadTexture();
@@ -79,6 +82,7 @@ public:
 	GLuint uProjection, uModelview, sModelview;
 	void translate(glm::vec3 transVec);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
+	void walk(float x, float y,float z);
 };
 
 #endif

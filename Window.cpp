@@ -102,6 +102,8 @@ bool selection=true;
 bool rider;
 bool reachTop;
 bool normal;
+bool toggleWater;
+bool toggleTerrain;
 
 glm::vec3 xPlane=glm::vec3(1.0f, 0.0f, 0.0f);
 glm::vec3 yPlane=glm::vec3(0.0f, 1.0f, 0.0f);
@@ -143,20 +145,25 @@ glm::mat4 Window::V;
 bool Window::toggleSphere;
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 glm::vec3 camPos;
+int seed=1;
 
 // Sound System
 irrklang::ISoundEngine * SoundEngine1;
 
 void Window::initialize_objects()
 {
-	int seed = rand();
-	generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
 
+	
+	
 	cube = new Cube();
 	cube->scaleSize(1.0f);
-	terrain = new Terrain(generator);
-	terrain->translate(glm::vec3(-terrain->vertexCount - 50, 0, -terrain->vertexCount - 100));
-	terrain->scaleSize(3.0f, 1.0f, 3.0f);
+	
+		seed = randomInt();
+		generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
+		terrain = new Terrain(generator);
+		terrain->translate(glm::vec3(-terrain->vertexCount - 50, 0, -terrain->vertexCount - 100));
+		terrain->scaleSize(3.0f, 1.0f, 3.0f);
+	
 	water = new Water();
 
 
@@ -169,6 +176,7 @@ void Window::initialize_objects()
 
 	
 	sphere = new ROBObject(BALL_PATH);
+	sphere->isSphere = true;
 	horse = new ROBObject(HORSE_PATH);
 
 	testbox1 = new BoundingBox(sphere->boundingbox, sphere->boxVertices);
@@ -202,7 +210,8 @@ void Window::clean_up()
 {
 	delete(cube);
 	delete(currObj);
-	delete(terrain);
+
+	
 	glDeleteProgram(shaderProgram);
 	glDeleteProgram(skyboxShader);
 	glDeleteProgram(reflectShader);
@@ -286,6 +295,7 @@ void Window::idle_callback()
 	//modelMtx->update();
 	checkcollision();
 	camPos = { camera.position.x, camera.position.y, camera.position.z };
+	//horse->toWorld[3].y = terrain->getHeightMove(horse->toWorld[3].x, horse->toWorld[3].z);
 
 }
 
@@ -321,19 +331,20 @@ void Window::display_callback(GLFWwindow* window)
 }
 void Window::renderReflection() {
 	water->bindReflectionFrameBuffer();
-	GLfloat distance = 2 * (camera.position.y);
+	GLfloat distance = 2 * (camera.position.y-1);
 	camera.position.y -= distance;
 
 	camera.invertPitch();
 	V = camera.getViewMatrix();
-	glm::vec4 CP = glm::vec4(0, 1, 0, 0);
+	glm::vec4 CP = glm::vec4(0, 1, 0, 0.5);
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);
-
-	glUseProgram(terrainShader);
-	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
-	terrain->draw(terrainShader);
+	if (toggleTerrain) {
+		glUseProgram(terrainShader);
+		glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
+		terrain->draw(terrainShader);
+	}
 	//glUseProgram(shaderProgram);
 
 	//->draw(shaderProgram);
@@ -347,7 +358,7 @@ void Window::renderReflection() {
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
 	//army->draw(toonShader, glm::mat4(1.0f));
 	horse->draw(toonShader);
-	sphere->draw(toonShader);
+	sphere->draw(shaderProgram);
 	glUseProgram(boundShader);
 	if (debugMode) {
 		testbox1->draw(boundShader);
@@ -364,14 +375,16 @@ void Window::renderReflection() {
 void Window::renderRefraction() {
 
 	water->bindRefractionFrameBuffer();
-	glm::vec4 CP = glm::vec4(0, -1, 0,0);
+	glm::vec4 CP = glm::vec4(0, -1, 0,1);
 	
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);
-	glUseProgram(terrainShader);
-	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
-	terrain->draw(terrainShader);
+	if (toggleTerrain) {
+		glUseProgram(terrainShader);
+		glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
+		terrain->draw(terrainShader);
+	}
 	//glUseProgram(shaderProgram);
 
 	//->draw(shaderProgram);
@@ -385,7 +398,7 @@ void Window::renderRefraction() {
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
 	//army->draw(toonShader, glm::mat4(1.0f));
 	horse->draw(toonShader);
-	sphere->draw(toonShader);
+	sphere->draw(shaderProgram);
 
 
 
@@ -399,13 +412,14 @@ void Window::renderRefraction() {
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 void Window::renderAll() {
-	
-	glm::vec4 CP = glm::vec4(0, -1, 0, 1000.0f);
+	glDisable(GL_CLIP_DISTANCE0);
+  	glm::vec4 CP = glm::vec4(0, -1, 0, 1000.0f);
 	//camPos = { camera.position.x, camera.position.y, camera.position.z };
-
-	glUseProgram(terrainShader);
-	glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
-	terrain->draw(terrainShader);
+	if (toggleTerrain) {
+		glUseProgram(terrainShader);
+		glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
+		terrain->draw(terrainShader);
+	}
 	glUseProgram(shaderProgram);
 
 	//->draw(shaderProgram);
@@ -417,7 +431,7 @@ void Window::renderAll() {
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
 	//army->draw(toonShader, glm::mat4(1.0f));
 	horse->draw(toonShader);
-	sphere->draw(toonShader);
+	//sphere->draw(shaderProgram);
 
 	glUseProgram(boundShader);
 	//testbox1->draw(boundingShader, false);
@@ -426,12 +440,11 @@ void Window::renderAll() {
 		testbox2->draw(boundShader);
 	}
 
-	glDisable(GL_CLIP_DISTANCE0);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glUseProgram(waterShader);
-	water->draw(waterShader,camPos);
-	glDisable(GL_BLEND);
+	
+	if (toggleWater) {
+		glUseProgram(waterShader);
+		water->draw(waterShader, camPos);
+	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
@@ -475,26 +488,33 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			}
 
 		}
-		if (key == GLFW_KEY_H) {
-
+		if (key == GLFW_KEY_T) {
+			
 			if (nToggle) {
-				reachTop = false;
+				toggleTerrain = false;
 				nToggle = !nToggle;
 			}
 			else {
-				reachTop = true;
+				toggleTerrain = true;
+				seed = randomInt();
+				generator = new HeightGenerator(vertexCount, vertexCount, vertexCount, seed);
+				terrain = new Terrain(generator);
+				terrain->translate(glm::vec3(-terrain->vertexCount - 50, 0, -terrain->vertexCount - 100));
+				terrain->scaleSize(3.0f, 1.0f, 3.0f);
+				std::cout << "seed:" << seed << std::endl;
 				nToggle = !nToggle;
 			}
 
 		}
+		//water
 		if (key == GLFW_KEY_N) {
 
 			if (nToggle) {
-				normal = false;
+				toggleWater = false;
 				nToggle = !nToggle;
 			}
 			else {
-				normal = true;
+				toggleWater = true;
 				nToggle = !nToggle;
 			}
 

@@ -29,4 +29,5 @@ void main(){
     vec4 colorRefract = texture(refractionTexture, refractCoords);
     color = mix(colorReflect, colorRefract,0.5);
 	
+	//color = mix(color, vec4(0.0f, 0.3f, 0.5f, 1.0f), 0.2);
 }

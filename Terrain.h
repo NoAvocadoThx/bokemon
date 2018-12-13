@@ -27,17 +27,18 @@ private:
 	
 	
 public:
-
+	GLfloat x, z;
 	static const GLint vertexCount = 128;
 	GLint area = vertexCount * vertexCount;
 	std::vector<glm::vec3> tris;
 	std::vector<unsigned int> indices;
-
+	GLint seed;
 	GLuint VBO, VAO, EBO,Norms,TO;
 	GLuint uProjection, uModelview;
 	glm::vec3 position;
 	GLfloat * tVertices,*tNormals,*textureCoords;
 	int * index;
+	float heightMove[vertexCount][vertexCount];
 	glm::mat4 toWorld;
 	GLint terrainCount = 0;
 	const GLfloat width = 10.0f;
@@ -59,6 +60,8 @@ public:
 	glm::vec3 calculateNormal(int x, int z, HeightGenerator*);
 	float getHeight(int x, int z, HeightGenerator*);
 	void scaleSize(GLfloat scaleV,GLfloat,GLfloat);
+	float getHeightMove(float, float);
+	static float barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2  pos);
 };
 
 

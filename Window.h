@@ -76,6 +76,12 @@ public:
 	
 	static void renderAll();
 	static void checkcollision();
+	static GLint randomInt() {
+		srand((unsigned)time(0));
+		int i;
+		i = (rand() % 100000) + 1;
+		return i;
+	}
 };
 
 #endif

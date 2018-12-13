@@ -9,7 +9,7 @@
 
 HeightGenerator::HeightGenerator()
 {
- seed = randomInt(1, 1000000000);
+ seed = randomInt();
 }
 
 HeightGenerator::HeightGenerator(int gridX, int gridZ, int vertexCount, int seed) {
@@ -62,5 +62,5 @@ float HeightGenerator::getSmoothNoise(int x, int z) {
 
 float HeightGenerator::getNoise(int x, int z) {
 	seed = x * 4654 + z * 324176 + seed;
-	return ((double)rand() / (RAND_MAX)) * 2.0f - 1.0f;
+	return ((double)rand() / (RAND_MAX)) * 2.0f -1.0f;
 }

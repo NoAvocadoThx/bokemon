@@ -21,6 +21,8 @@ Terrain::Terrain(HeightGenerator* gen) {
 	toWorld = glm::mat4(1.0f);
 	generateTerrain(gen);
 	loadTexture2();
+	seed = gen->seed;
+	//heightMove.assign(lRes, vector<float>(wRes, 1));
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -93,8 +95,9 @@ void Terrain::generateTerrain(HeightGenerator* generator) {
 				tris.push_back(tri2);
 			}
 			i++;*/
-			float height = getHeight(x, z, generator);
 			
+			float height = getHeight(x, z, generator);
+			heightMove[x][z] = height;
 				tVertices[i * 3] = (float)x / ((float)lRes - 1)*size;
 				tVertices[i * 3 + 1] = height;
 				tVertices[i * 3 + 2] = (float)z / ((float)wRes - 1)*size;
@@ -310,10 +313,45 @@ glm::vec3 Terrain::calculateNormal(int x, int z, HeightGenerator *generator) {
 }
 
 float Terrain::getHeight(int x, int z, HeightGenerator *generator) {
+	this->x = x;
+	this->z = z;
 	return generator->genHeight(x, z);
 }
 
 void Terrain::scaleSize(GLfloat scaleV,GLfloat b,GLfloat c) {
 
 	toWorld = toWorld * glm::scale(glm::mat4(1.0f), glm::vec3(scaleV, b, c));
+}
+float Terrain::getHeightMove(float worldX, float worldZ) {
+	float terrainX = worldX - x;
+	float terrainZ = worldZ - z;
+	float gridSquareSize = size / (float)(128*128 - 1);
+	int gridX = (int)floor(terrainX / gridSquareSize);
+	int gridZ = (int)floor(terrainZ / gridSquareSize);
+	if (gridX >= 128 * 128 - 1 || gridZ >= 128 * 128 - 1 || gridX < 0 || gridZ < 0) {
+		return 0;
+	}
+	float xCoord = (fmod(terrainX,gridSquareSize))/gridSquareSize;
+	float zCoord = (fmod(terrainZ, gridSquareSize))/ gridSquareSize;
+	float anwser;
+	if (xCoord <= (1 - zCoord)) {
+		anwser = (barryCentric(glm::vec3(0, heightMove[gridX][gridZ], 0),
+			glm::vec3(1, heightMove[gridX + 1][gridZ], 0),
+			glm::vec3(0, heightMove[gridX][gridZ + 1], 1),
+			glm::vec2(xCoord, zCoord)));
+	}
+	else {
+		anwser = (barryCentric(glm::vec3(1, heightMove[gridX+1][gridZ], 0),
+			glm::vec3(1, heightMove[gridX + 1][gridZ+1], 0),
+			glm::vec3(0, heightMove[gridX][gridZ + 1], 1),
+			glm::vec2(xCoord, zCoord)));
+	}
+	return anwser;
+}
+float Terrain::barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2  pos) {
+	float det = (p2.z - p3.z) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.z - p3.z);
+	float l1 = ((p2.z - p3.z) * (pos.x - p3.x) + (p3.x - p2.x) * (pos.y - p3.z)) / det;
+	float l2 = ((p3.z - p1.z) * (pos.x - p3.x) + (p1.x - p3.x) * (pos.y - p3.z)) / det;
+	float l3 = 1.0f - l1 - l2;
+	return l1 * p1.y + l2 * p2.y + l3 * p3.y;
 }
