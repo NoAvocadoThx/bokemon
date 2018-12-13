@@ -106,6 +106,7 @@ bool normal;
 bool toggleWater;
 bool toggleTerrain;
 bool newHorse;
+bool toggleWater3d;
 
 glm::vec3 xPlane=glm::vec3(1.0f, 0.0f, 0.0f);
 glm::vec3 yPlane=glm::vec3(0.0f, 1.0f, 0.0f);
@@ -128,6 +129,8 @@ glm::vec3 zPlane=glm::vec3(0.0f, 0.0f, 1.0f);
 #define BALL_PATH "../ball.obj"
 #define BODY_PATH "../body.obj"
 #define HORSE_PATH "../horse.obj"
+#define TREX_PATH "../T-Rex.obj"
+
 #define COW_PATH "../Irex_obj.obj"
 #define WOLF_PATH "../wolf.obj"
 #define TOON_VERT "../toonShader.vert"
@@ -328,9 +331,10 @@ void Window::display_callback(GLFWwindow* window)
 	glm::vec3 rOrigin;
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	renderReflection();
-	renderRefraction();
+	
+		renderReflection();
+		renderRefraction();
+	
 	renderAll();
 	//ball->draw(toonShader);
 	//glUniform3fv(glGetUniformLocation(toonShader, "eye_position"), 1, &(pos[0]));
@@ -358,29 +362,31 @@ void Window::renderReflection() {
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);
+	if (toggleWater3d) {
 	if (toggleTerrain) {
 		glUseProgram(terrainShader);
 		glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
 		terrain->draw(terrainShader);
 	}
 	//glUseProgram(shaderProgram);
+	
+		//->draw(shaderProgram);
+		glUseProgram(toonShader);
+		glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
+		//glUseProgram(toonShader);
+		//body1->draw(shaderProgram);
 
-	//->draw(shaderProgram);
-	glUseProgram(toonShader);
-	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
-	//glUseProgram(toonShader);
-	//body1->draw(shaderProgram);
-
-	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
-	//camPos = { camera.position.x, camera.position.y, camera.position.z };
-	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
-	//army->draw(toonShader, glm::mat4(1.0f));
-	horse->draw(toonShader);
-	sphere->draw(toonShader);
-	glUseProgram(boundShader);
-	if (debugMode) {
-		testbox1->draw(boundShader);
-		testbox2->draw(boundShader);
+		glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+		//camPos = { camera.position.x, camera.position.y, camera.position.z };
+		glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
+		//army->draw(toonShader, glm::mat4(1.0f));
+		horse->draw(toonShader);
+		sphere->draw(toonShader);
+		glUseProgram(boundShader);
+		if (debugMode) {
+			testbox1->draw(boundShader);
+			testbox2->draw(boundShader);
+		}
 	}
 	water->unbindCurrentFrameBuffer();
 	camera.position.y += distance;
@@ -398,33 +404,35 @@ void Window::renderRefraction() {
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);
-	if (toggleTerrain) {
-		glUseProgram(terrainShader);
-		glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
-		terrain->draw(terrainShader);
-	}
-	//glUseProgram(shaderProgram);
+	if (toggleWater3d) {
+		if (toggleTerrain) {
+			glUseProgram(terrainShader);
+			glUniform4f(terrainCP, CP.x, CP.y, CP.z, CP.w);
+			terrain->draw(terrainShader);
+		}
+		//glUseProgram(shaderProgram);
 
-	//->draw(shaderProgram);
-	glUseProgram(toonShader);
-	glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
-	//glUseProgram(toonShader);
-	//body1->draw(shaderProgram);
+		//->draw(shaderProgram);
+		glUseProgram(toonShader);
+		glUniform4f(objCP, CP.x, CP.y, CP.z, CP.w);
+		//glUseProgram(toonShader);
+		//body1->draw(shaderProgram);
 
-	glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
-	//camPos = { camera.position.x, camera.position.y, camera.position.z };
-	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
-	//army->draw(toonShader, glm::mat4(1.0f));
-	horse->draw(toonShader);
-	sphere->draw(toonShader);
+		glm::vec3 pos = { camera.position.x, camera.position.y, camera.position.z };
+		//camPos = { camera.position.x, camera.position.y, camera.position.z };
+		glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
+		//army->draw(toonShader, glm::mat4(1.0f));
+		horse->draw(toonShader);
+		sphere->draw(toonShader);
 
 
 
-	glUseProgram(boundShader);
-	//testbox1->draw(boundingShader, false);
-	if (debugMode) {
-		testbox1->draw(boundShader);
-		testbox2->draw(boundShader);
+		glUseProgram(boundShader);
+		//testbox1->draw(boundingShader, false);
+		if (debugMode) {
+			testbox1->draw(boundShader);
+			testbox2->draw(boundShader);
+		}
 	}
 	water->unbindCurrentFrameBuffer();
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -555,6 +563,19 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			else {
 				newHorse = true;
 				spawnHorse();
+				nToggle = !nToggle;
+			}
+
+		}
+		if (key == GLFW_KEY_O) {
+
+			if (nToggle) {
+				toggleWater3d = false;
+				nToggle = !nToggle;
+			}
+			else {
+				toggleWater3d = true;
+				
 				nToggle = !nToggle;
 			}
 
@@ -722,7 +743,16 @@ void Window::checkcollision() {
 
 }
 void Window::spawnHorse() {
-	horse = new ROBObject(HORSE_PATH);
+	srand((unsigned)time(0));
+	int i;
+	i = (rand() % 2) + 1;
+	if (i == 1) {
+		horse = new ROBObject(TREX_PATH);
+	}
+	else if (i == 2) {
+		horse = new ROBObject(HORSE_PATH);
+	}
+	
 
 
 	testbox2 = new BoundingBox(horse->boundingbox, horse->boxVertices);
