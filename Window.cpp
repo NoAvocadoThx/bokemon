@@ -155,8 +155,8 @@ void Window::initialize_objects()
 	cube = new Cube();
 	cube->scaleSize(1.0f);
 	terrain = new Terrain(generator);
-	terrain->translate(glm::vec3(-terrain->vertexCount - 50, -7, -terrain->vertexCount - 100));
-	terrain->scaleSize(2.0f, 1.0f, 2.0f);
+	terrain->translate(glm::vec3(-terrain->vertexCount - 50, 0, -terrain->vertexCount - 100));
+	terrain->scaleSize(3.0f, 1.0f, 3.0f);
 	water = new Water();
 
 
@@ -321,7 +321,12 @@ void Window::display_callback(GLFWwindow* window)
 }
 void Window::renderReflection() {
 	water->bindReflectionFrameBuffer();
-	glm::vec4 CP = glm::vec4(0, 1, 0, 2);
+	GLfloat distance = 2 * (camera.position.y);
+	camera.position.y -= distance;
+
+	camera.invertPitch();
+	V = camera.getViewMatrix();
+	glm::vec4 CP = glm::vec4(0, 1, 0, 0);
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);
 	cube->draw(skyboxShader);
@@ -349,13 +354,17 @@ void Window::renderReflection() {
 		testbox2->draw(boundShader);
 	}
 	water->unbindCurrentFrameBuffer();
+	camera.position.y += distance;
+
+	camera.invertPitch();
+	V = camera.getViewMatrix();
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 }
 void Window::renderRefraction() {
 
 	water->bindRefractionFrameBuffer();
-	glm::vec4 CP = glm::vec4(0, -1, 0,-2.2);
+	glm::vec4 CP = glm::vec4(0, -1, 0,0);
 	
 	glUseProgram(skyboxShader);
 	glUniform4f(boxCP, CP.x, CP.y, CP.z, CP.w);

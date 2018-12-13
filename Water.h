@@ -26,6 +26,7 @@ public:
 	//depth buffer
 	GLuint reflectionDB, refractionDB;
 	GLuint reflectionTexture, refractionTexture;
+	GLuint refracDepthTexture;
 	GLuint uProjection, uModelview;
 	glm::vec3 position;
 	glm::mat4 toWorld;
@@ -38,6 +39,7 @@ public:
 	GLint refrac_height = 1080;
 	GLfloat waterHeight = 1.0f;
 	GLdouble startTime,curTime;
+	GLfloat moveSpeed = 0.00003;
 
 	Water();
 	~Water();
@@ -47,9 +49,11 @@ public:
 	void bindReflectionFrameBuffer();
 	void bindRefractionFrameBuffer();
 	void unbindCurrentFrameBuffer();
+    void createDepthTexture();
 	GLfloat getHeight();
 	void scale(GLfloat);
 	void translate(glm::vec3);
+	//void update();
 
 
 	

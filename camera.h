@@ -69,7 +69,7 @@ public:
 	void handleMouseMove(GLfloat xoffset, GLfloat yoffset)
 	{
 
-		xoffset *=- this->mouse_sensitivity; 
+		xoffset *= -this->mouse_sensitivity; 
 		yoffset *= this->mouse_sensitivity;
 
 		this->pitchAngle += yoffset;
@@ -103,7 +103,7 @@ public:
 	{
 		glm::vec3 forward;
 		forward.x = -sin(glm::radians(this->yawAngle)) * cos(glm::radians(this->pitchAngle)+100);
-		forward.y = sin(glm::radians(this->pitchAngle)+100);
+		forward.y = sin(glm::radians(this->pitchAngle));
 		forward.z = -cos(glm::radians(this->yawAngle)) * cos(glm::radians(this->pitchAngle)+100);
 		this->forward = glm::normalize(forward);
 
@@ -112,6 +112,10 @@ public:
 		side.y = 0;
 		side.z = -sin(glm::radians(this->yawAngle));
 		this->side = glm::normalize(side);
+	}
+	void invertPitch() {
+		this->pitchAngle = -pitchAngle;
+		updateCameraVectors();
 	}
 public:
 	 glm::vec3 forward, up, side, viewUp, position;

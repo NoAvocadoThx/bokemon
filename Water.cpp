@@ -3,29 +3,36 @@
 #include "camera.h"
 
 
+GLfloat flow = 0;
+GLfloat reflectArray[] = { 1.0, 0.0, 0.0, 0.0,
+0.0, -1.0, 0.0, 0.0,
+0.0, 0.0, 1.0, 0.0,
+0.0, 0.0, 0.0, 1.0 };
+
+glm::mat4 reflectMat = glm::make_mat4(reflectArray);
 Water::Water() {
 	toWorld = glm::mat4(1.0f);
 	
 	
 	//translate(glm::vec3(1, waterHeight, 1));
-	startTime = glfwGetTime();
-	GLfloat vertices[] = { 0.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f,
-
-		0.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 0.0f,
+	startTime = glutGet(GLUT_ELAPSED_TIME);
+	GLfloat vertices[] = { -1, -1, 0,
+							-1, 1, 0,
+							1, -1, 0,
+							1, -1, 0,
+							-1, 1, 0,
+							1, 1, 0
 
 	 };
+	
 	//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(size, 1.0f, size));
 	scale(800);
-	translate(glm::vec3(-500, -9.5f, -500));
+	translate(glm::vec3(-500,0, -500));
 	//toWorld = glm::translate(scale, glm::vec3(-10, -4, -10));
 	//glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(100, 1.0f, 100));
 	//toWorld = glm::translate(scale, glm::vec3(-25, -5, -20));
 	texture[0] = loadTexture("../Water.jpg");
-	dudvMap = loadTexture("../WaterDUDV.jpg");
+	dudvMap = loadTexture("../dudv2.png");
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	//glGenBuffers(1, &EBO);
@@ -50,14 +57,14 @@ Water::Water() {
 	//first reflection FB
 	glGenFramebuffers(1, &reflectionFrameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFrameBuffer);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	glGenTextures(1, &reflectionTexture);
 	glBindTexture(GL_TEXTURE_2D, reflectionTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, reflec_width, reflec_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTexture, 0);
 	//refraction FB
 	glGenFramebuffers(1, &refractionFrameBuffer);
@@ -66,10 +73,10 @@ Water::Water() {
 	glGenTextures(1, &refractionTexture);
 	glBindTexture(GL_TEXTURE_2D, refractionTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, refrac_width, refrac_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTexture, 0);
     //depth FB
 	//reflection
@@ -78,11 +85,7 @@ Water::Water() {
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, reflec_width, reflec_height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionDB);
 	//reraction
-	glGenRenderbuffers(1, &refractionDB);
-	glBindRenderbuffer(GL_RENDERBUFFER, refractionDB);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, refrac_width, refrac_height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, refractionDB);
-
+	createDepthTexture();
 
 }
 Water::~Water()
@@ -95,22 +98,35 @@ Water::~Water()
 	glDeleteFramebuffers(1, &refractionDB);
 	glDeleteFramebuffers(1, &reflectionDB);
 }
-
+void Water::createDepthTexture() {
+	
+	glGenTextures(1, &refracDepthTexture);
+	glBindTexture(GL_TEXTURE_2D, refracDepthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, refrac_width, refrac_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+		refracDepthTexture, 0);
+}
 void Water::draw(GLuint shaderProgram,glm::vec3 cam) {
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glm::mat4 modelview = Window::V * toWorld;
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
+	glm::mat4 view = Window::V;
+	glm::mat4 projection = Window::P;
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &toWorld[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelview"), 1, GL_FALSE, &modelview[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "reflection"), 1, GL_FALSE, &reflectMat[0][0]);
 	glUniform3f(glGetUniformLocation(shaderProgram, "camPos"),cam.x, cam.y, cam.z );
 	glBindVertexArray(VAO);
-	curTime = glfwGetTime();
-	GLfloat flow=0;
+	curTime = glutGet(GLUT_ELAPSED_TIME);
+	
 	float d = curTime - startTime;
 	startTime = curTime;
-	flow+= 0.2*d;
+	flow += moveSpeed * d;
 	flow = fmod(flow, 1.0f);
 	glUniform1f(glGetUniformLocation(shaderProgram, "flow"), flow);
 	glActiveTexture(GL_TEXTURE0);
