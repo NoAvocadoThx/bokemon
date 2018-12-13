@@ -38,6 +38,10 @@ private:
 	std::vector<unsigned int> indices;
 
 public:
+	int duration, durationdead;
+	bool finishedfire, finisheddie;
+	bool firing = false;
+	bool dying = false;
 	std::vector<glm::vec3> boxVertices;
 	std::vector<GLfloat> boundingbox;
 	glm::vec3 position;
@@ -53,11 +57,11 @@ public:
 	float shininess;
 	float size;
 	float angle;
-	bool rotateMode, scaleMode;
+	bool rotateMode=false;
 	bool rotatelock_point, rotatelock_spot;
 	glm::vec3 rotAxis;
 	float rotAngle;
-	float scale_size;
+	glm::vec3 viewdir;	float scale_size;
 	~ROBObject();
 	glm::mat4 toWorld;
 	glm::mat4 lightM;
@@ -81,6 +85,9 @@ public:
 	void ROBObject::translateZ(float xVal);
 	GLuint uProjection, uModelview, sModelview;
 	void translate(glm::vec3 transVec);
+	void scalesize(float val);
+	void fire(void);
+	void die(void);
 	unsigned char* loadPPM(const char* filename, int& width, int& height);
 	void walk();
 };

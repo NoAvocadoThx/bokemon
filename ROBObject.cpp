@@ -18,7 +18,8 @@ using namespace std;
 ROBObject::ROBObject() {}
 ROBObject::ROBObject(const char *filepath)
 {
-
+	duration = 100;
+	durationdead = 50;
 	toWorld = glm::mat4(1.0f);
 	//toWorld *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 45.0f, 0.0f));
 	parse(filepath);
@@ -520,8 +521,32 @@ void ROBObject::setPosition(glm::vec3 newPos) {
 
 void ROBObject::draw(GLuint shaderProgram)
 {
+	/*
+	if (rotateMode) {
 
+		toWorld = glm::rotate(glm::mat4(1.0f), rotAngle, rotAxis) * toWorld;
+		rotAngle = 0;
 
+	}
+	*/
+	if (duration > 0 && firing) {
+		fire();
+	}
+	if (duration == 0) {
+		finishedfire = true;
+	}
+	else {
+		finishedfire = false;
+	}
+	if (durationdead > 0 && dying) {
+		die();
+	}
+	if (durationdead == 0) {
+		finisheddie = true;
+	}
+	else {
+		finisheddie = false;
+	}
 	glm::mat4 modelview = Window::V * toWorld;
 
 
@@ -552,7 +577,19 @@ void ROBObject::translateZ(float zVal) {
 	glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, zVal)); //
 	toWorld = translateMat * toWorld;
 }
-
+void ROBObject::fire() {
+	glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f + viewdir.x, 0.0f + viewdir.y, -1.0f + viewdir.z)); //
+	//glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+	toWorld = translateMat * toWorld;
+	duration--;
+}
+void ROBObject::die() {
+	toWorld = toWorld * glm::scale(glm::mat4(1.0f), glm::vec3(0.9));
+	durationdead--;
+}
+void ROBObject::scalesize(float val) {
+	toWorld = toWorld * glm::scale(glm::mat4(1.0f), glm::vec3(val));
+}
 void ROBObject::walk() {
 	int count = 0;
 	toWorld = toWorld * glm::rotate(glm::mat4(1.0f), 1.0f / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));

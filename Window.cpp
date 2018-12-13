@@ -1,12 +1,13 @@
 ﻿#include "window.h"
 
-
+glm::vec3 direction;
 GLfloat lastX = Window::width / 2.0f, lastY = Window::height / 2.0f;
 bool firstMouseMove = true;
 bool keyPressedStatus[1024]; 
 GLfloat deltaTime = 0.0f; 
 GLfloat lastFrame = 0.0f; 
-
+bool fired = false;
+bool walking = false;
 bool debugMode = false;
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
@@ -296,10 +297,22 @@ void Window::idle_callback()
 	//modelMtx->update();
 	checkcollision();
 	camPos = { camera.position.x, camera.position.y, camera.position.z };
-	horse->walk();
-	testbox2->toWorld = horse->toWorld;
-	//horse->toWorld[3].y = terrain->getHeightMove(horse->toWorld[3].x, horse->toWorld[3].z);
+	if (walking) {
+		horse->walk();
 
+	}
+	//horse->toWorld[3].y = terrain->getHeightMove(horse->toWorld[3].x, horse->toWorld[3].z);
+	if (!fired) {
+		sphere->toWorld = glm::translate(glm::mat4(1.0f), camPos);
+		sphere->viewdir = camera.getViewDir();
+	}
+	if (sphere->finishedfire) {
+		fired = false;
+		sphere->firing = false;
+		sphere->duration = 100;
+	}
+	testbox1->toWorld = sphere->toWorld;
+	testbox2->toWorld = horse->toWorld;
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -361,7 +374,7 @@ void Window::renderReflection() {
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
 	//army->draw(toonShader, glm::mat4(1.0f));
 	horse->draw(toonShader);
-	sphere->draw(shaderProgram);
+	sphere->draw(toonShader);
 	glUseProgram(boundShader);
 	if (debugMode) {
 		testbox1->draw(boundShader);
@@ -401,7 +414,7 @@ void Window::renderRefraction() {
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
 	//army->draw(toonShader, glm::mat4(1.0f));
 	horse->draw(toonShader);
-	sphere->draw(shaderProgram);
+	sphere->draw(toonShader);
 
 
 
@@ -434,7 +447,7 @@ void Window::renderAll() {
 	glUniform3fv(glGetUniformLocation(toonShader, "cameraPosition"), 1, &(pos[0]));
 	//army->draw(toonShader, glm::mat4(1.0f));
 	horse->draw(toonShader);
-	//sphere->draw(shaderProgram);
+	sphere->draw(toonShader);
 
 	glUseProgram(boundShader);
 	//testbox1->draw(boundingShader, false);
@@ -522,7 +535,15 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			}
 
 		}
-		
+		if (key == GLFW_KEY_M) {
+			if(walking) {
+				walking = false;
+
+			}
+		else {
+			walking = true;
+			}
+		}
 
 	}
 
@@ -611,9 +632,10 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 			left_release = false;
 			glfwGetCursorPos(window, &c_initX, &c_initY);
 			lastPoint = trackBallMapping(glm::vec2(c_initX, c_initY));
-			
-		
-			//cout << "selection xyz:" << selectPts[indexSelect].x << endl;
+			if (!fired) {
+				sphere->firing = true;
+				fired = true;
+			}
 
 		}
 		//if release
@@ -637,13 +659,24 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 		lastY = ypos;
 		firstMouseMove = false;
 	}
-
+	currPoint = trackBallMapping(glm::vec2(xpos, ypos));
+	direction = currPoint - lastPoint;
+	float velocity = glm::length(direction);
+	if (velocity > 0.001)
+	{
+		glm::vec3 rotAxis;
+		float rotAngle;
+		rotAxis = glm::cross(lastPoint, currPoint);
+		rotAngle = acos(glm::dot(lastPoint, currPoint) / (glm::length(lastPoint)*glm::length(currPoint)));
+		sphere->rotAngle = rotAngle;
+		sphere->rotAxis = rotAxis;
+	}
 	GLfloat xoffset = xpos - lastX;
 	GLfloat yoffset = lastY - ypos;
 
 	lastX = xpos;
 	lastY = ypos;
-
+	lastPoint = currPoint;
 	camera.handleMouseMove(xoffset, yoffset);
 	V = camera.getViewMatrix();
 }
@@ -658,6 +691,7 @@ void Window::checkcollision() {
 			bound1[1] < bound2[0] && bound1[3] < bound2[2] && bound1[5] < bound2[4]) {
 			testbox1->collisionflag = true;
 			testbox2->collisionflag = true;
+			horse->dying = true;
 			if (!played) {
 				SoundEngine1->play2D(SMASH_PATH, GL_FALSE);
 				played = true;

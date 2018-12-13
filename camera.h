@@ -43,7 +43,9 @@ public:
 	{
 		return glm::lookAt(this->position, this->position + this->forward, this->viewUp);
 	}
-
+	glm::vec3 getViewDir() {
+		return forward;
+	}
 	void handleKeyPress(Camera_Movement direction, GLfloat deltaTime)
 	{
 		GLfloat velocity = this->moveSpeed * deltaTime;
