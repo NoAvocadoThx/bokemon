@@ -1,2 +1,14 @@
-# cse167 final project
-demo of first person perspective game that player will spawn on an island surrounded by water and the goal is to catch all bokemons on the island.
+# Bokemon
+A demo of a 3D game
+
+
+
+## Documentation
+
+Functionality           | Library
+----------------------- | ------------------------------------------
+OpenGL Function Loader  | [glad](https://github.com/Dav1dde/glad)
+Windowing and Input     | [glfw](https://github.com/glfw/glfw)
+OpenGL Mathematics      | [glm](https://github.com/g-truc/glm)
+Texture Loading         | [stb](https://github.com/nothings/stb)
+

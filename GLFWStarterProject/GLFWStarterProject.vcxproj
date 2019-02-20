@@ -45,8 +45,6 @@
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\ball.cpp" />
-    <ClCompile Include="..\BoundingBox.cpp" />
     <ClCompile Include="..\Curve.cpp" />
     <ClCompile Include="..\Geometry.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -61,6 +59,24 @@
     <ClCompile Include="..\Plane.cpp" />
     <ClCompile Include="..\ROBObject.cpp" />
     <ClCompile Include="..\shader.cpp" />
+    <ClCompile Include="..\src\ball.cpp" />
+    <ClCompile Include="..\src\BoundingBox.cpp" />
+    <ClCompile Include="..\src\camera.cpp" />
+    <ClCompile Include="..\src\Cube.cpp" />
+    <ClCompile Include="..\src\Curve.cpp" />
+    <ClCompile Include="..\src\Geometry.cpp" />
+    <ClCompile Include="..\src\HeightGenerator.cpp" />
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\OBJObject.cpp" />
+    <ClCompile Include="..\src\Plane.cpp" />
+    <ClCompile Include="..\src\ROBObject.cpp" />
+    <ClCompile Include="..\src\shader.cpp" />
+    <ClCompile Include="..\src\sound.cpp" />
+    <ClCompile Include="..\src\stb_image.cpp" />
+    <ClCompile Include="..\src\Terrain.cpp" />
+    <ClCompile Include="..\src\Transform.cpp" />
+    <ClCompile Include="..\src\Water.cpp" />
+    <ClCompile Include="..\src\Window.cpp" />
     <ClCompile Include="..\stb_image.cpp" />
     <ClCompile Include="..\Terrain.cpp" />
     <ClCompile Include="..\Transform.cpp" />
@@ -68,14 +84,11 @@
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\boundingShader.frag" />
-    <None Include="..\boundingShader.vert" />
-    <None Include="..\boxShader.frag" />
-    <None Include="..\boxShader.vert" />
     <None Include="..\curveShader.frag" />
     <None Include="..\curveShader.vert" />
     <None Include="..\objShader.frag" />
     <None Include="..\objShader.vert" />
+    <None Include="..\README.md" />
     <None Include="..\reflectShader.frag" />
     <None Include="..\reflectShader.vert" />
     <None Include="..\selectShader.frag" />
