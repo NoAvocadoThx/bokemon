@@ -1,5 +1,5 @@
 # Bokemon
-A demo of a 3D game
+A demo of a 3D FPS game. Mainly focusing on graphics.
 
 
 
